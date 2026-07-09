@@ -1,0 +1,50 @@
+{
+  "title": "Xisper Architecture",
+  "sections": [
+    {
+      "label": "Client Layer",
+      "color": "yellow",
+      "items": [
+        { "label": "Electron Desktop", "color": "yellow", "desc": "Embeds Web dist, 2 windows" },
+        { "label": "Web (Browser)", "color": "yellow", "desc": "Vue3 SPA standalone" },
+        { "label": "mac-desktop", "color": "orange", "desc": "SwiftUI native (WIP)" }
+      ]
+    },
+    {
+      "label": "Web / Renderer",
+      "color": "blue",
+      "items": [
+        { "label": "Vue3 + Vite", "color": "blue", "desc": "Home, History, Hotwords" },
+        { "label": "LiveTranscribe", "color": "blue", "desc": "Bubble panel" },
+        { "label": "IPC / ContextBridge", "color": "blue", "desc": "Electron only" }
+      ]
+    },
+    {
+      "label": "Services (CF Workers)",
+      "color": "green",
+      "items": [
+        { "label": "services", "color": "green", "desc": "API, ASR proxy, auth" },
+        { "label": "ai-worker", "color": "green", "desc": "LLM postprocess, chat" }
+      ]
+    },
+    {
+      "label": "External / Storage",
+      "color": "gray",
+      "items": [
+        { "label": "Alibaba ASR", "color": "gray", "desc": "Fun-ASR WebSocket" },
+        { "label": "Logto", "color": "gray", "desc": "OAuth" },
+        { "label": "D1 / KV / R2", "color": "gray", "desc": "CF bindings" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "Electron Desktop", "to": "Vue3 + Vite", "label": "loadURL" },
+    { "from": "Web (Browser)", "to": "Vue3 + Vite", "style": "dashed" },
+    { "from": "mac-desktop", "to": "services", "label": "REST/WS" },
+    { "from": "Vue3 + Vite", "to": "services", "label": "Bearer" },
+    { "from": "services", "to": "ai-worker", "label": "proxy" },
+    { "from": "services", "to": "Alibaba ASR", "label": "WS" },
+    { "from": "services", "to": "Logto", "style": "dashed" },
+    { "from": "services", "to": "D1 / KV / R2", "style": "dashed" }
+  ]
+}

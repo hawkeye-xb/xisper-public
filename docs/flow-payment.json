@@ -1,0 +1,80 @@
+{
+  "title": "Flow 2: Payment (Ticket-based)",
+  "actors": [
+    { "label": "macOS App", "color": "blue" },
+    { "label": "Browser", "color": "yellow" },
+    { "label": "Backend", "color": "purple" },
+    { "label": "Creem", "color": "orange" }
+  ],
+  "steps": [
+    {
+      "actor": "macOS App",
+      "text": "1. User clicks Upgrade\nmarkAwaitingPayment()"
+    },
+    {
+      "actor": "Backend",
+      "text": "2. Create ticket\nStore in KV (5min TTL)\nReturn opaque ticket",
+      "from": "macOS App",
+      "arrow": "POST /pricing/ticket\n(Bearer token)"
+    },
+    {
+      "actor": "macOS App",
+      "text": "3. Got ticket\nOpen browser",
+      "from": "Backend",
+      "arrow": "{ticket: abc123}",
+      "style": "dashed"
+    },
+    {
+      "actor": "Browser",
+      "text": "4. Pricing page\nMonth $9.99 | Year $79.99",
+      "from": "macOS App",
+      "arrow": "open URL"
+    },
+    {
+      "actor": "Backend",
+      "text": "5. Validate ticket\nRender HTML\n(no JS, no token)",
+      "from": "Browser",
+      "arrow": "GET /pricing?t=ticket"
+    },
+    {
+      "actor": "Browser",
+      "text": "6. User clicks plan",
+      "from": "Backend",
+      "arrow": "HTML page",
+      "style": "dashed"
+    },
+    {
+      "actor": "Backend",
+      "text": "7. Validate ticket\nCreate checkout",
+      "from": "Browser",
+      "arrow": "GET /pricing/checkout\n?t=ticket&plan=yearly"
+    },
+    {
+      "actor": "Creem",
+      "text": "8. Hosted checkout\nUser pays",
+      "from": "Backend",
+      "arrow": "302 redirect"
+    },
+    {
+      "actor": "Backend",
+      "text": "9. Payment success page\nDeep link to app",
+      "from": "Creem",
+      "arrow": "redirect to\n/payment/success",
+      "style": "dashed"
+    },
+    {
+      "actor": "macOS App",
+      "text": "10. Callback received\nreconcileAndRefresh()\n+ retry after 3s",
+      "from": "Backend",
+      "arrow": "xisper-mac://\npayment-success",
+      "color": "green"
+    },
+    {
+      "actor": "Backend",
+      "text": "11. Webhook\nUpdate subscription\nUpdate user tier",
+      "from": "Creem",
+      "arrow": "POST /webhooks/creem\n(async)",
+      "color": "green"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@xisper/ai-worker",
+  "version": "0.1.0",
+  "description": "Xisper AI Worker - LLM provider abstraction with fallback chain",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "NO_PROXY='*' HTTP_PROXY='' HTTPS_PROXY='' wrangler dev --port 8788",
+    "deploy": "wrangler deploy",
+    "deploy:beta": "bash ../../scripts/deploy.sh ai-worker beta",
+    "deploy:prod": "bash ../../scripts/deploy.sh ai-worker production"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "ai",
+    "llm",
+    "hono",
+    "xisper"
+  ],
+  "author": "Xisper Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240620.0",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@xisper/prompts": "workspace:*",
+    "hono": "^4.4.0"
+  }
+}

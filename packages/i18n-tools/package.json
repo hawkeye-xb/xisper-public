@@ -1,0 +1,18 @@
+{
+  "name": "@xisper/i18n-tools",
+  "version": "1.0.0",
+  "description": "Internationalization translation tools for Xisper projects",
+  "type": "module",
+  "bin": {
+    "xisper-translate": "./src/translate.js"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "i18n",
+    "translation",
+    "xisper"
+  ]
+}
+

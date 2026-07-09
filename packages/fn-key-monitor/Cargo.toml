@@ -1,0 +1,25 @@
+[package]
+name = "fn-key-monitor"
+version = "0.1.0"
+edition = "2021"
+description = "macOS FN key monitor using CGEventTap"
+license = "MIT"
+repository = "https://github.com/nicepkg/xisper"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "2", default-features = false, features = ["napi4"] }
+napi-derive = "2"
+core-graphics = "0.24"
+core-foundation = "0.10"
+parking_lot = "0.12"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+strip = "symbols"
+

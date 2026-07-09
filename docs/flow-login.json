@@ -1,0 +1,54 @@
+{
+  "title": "Flow 1: Login (PKCE OAuth)",
+  "actors": [
+    { "label": "macOS App", "color": "blue" },
+    { "label": "Browser", "color": "yellow" },
+    { "label": "Backend", "color": "purple" },
+    { "label": "Logto", "color": "gray" }
+  ],
+  "steps": [
+    {
+      "actor": "macOS App",
+      "text": "1. User clicks Sign In\nGenerate PKCE\ncode_verifier + challenge"
+    },
+    {
+      "actor": "Browser",
+      "text": "2. Logto login page",
+      "from": "macOS App",
+      "arrow": "open browser"
+    },
+    {
+      "actor": "Logto",
+      "text": "3. /authorize\n?code_challenge=xxx",
+      "from": "Browser",
+      "arrow": "GET /authorize"
+    },
+    {
+      "actor": "Browser",
+      "text": "4. User authenticates",
+      "from": "Logto",
+      "arrow": "login page",
+      "style": "dashed"
+    },
+    {
+      "actor": "macOS App",
+      "text": "5. URL scheme callback\nxisper-mac://callback\n?code=xxx",
+      "from": "Browser",
+      "arrow": "302 redirect"
+    },
+    {
+      "actor": "Backend",
+      "text": "6. Exchange code\nPOST /auth/token\n+ code_verifier",
+      "from": "macOS App",
+      "arrow": "POST /auth/token"
+    },
+    {
+      "actor": "macOS App",
+      "text": "7. Store tokens\naccess_token + refresh\nfile-based storage",
+      "from": "Backend",
+      "arrow": "tokens",
+      "style": "dashed",
+      "color": "green"
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+name = "xisper-services"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─────────────────────────────────────────────────────────────
+# Copy this file to `wrangler.toml` and fill in your own
+# Cloudflare resource IDs, domains, and Logto tenant.
+# `wrangler.toml` is gitignored so real IDs never get committed.
+#
+# Secrets (never put these here — use `wrangler secret put`):
+#   DEEPSEEK_API_KEY, SONIOX_API_KEY
+# ─────────────────────────────────────────────────────────────
+
+# Enable observability
+[observability]
+enabled = true
+
+# Scheduled tasks (Cron Triggers)
+# Daily at 04:00 UTC (12:00 Beijing): quota reset logging + subscription audit
+[triggers]
+crons = ["0 4 * * *"]
+
+# ============================================
+# Default configuration (for wrangler dev)
+# ============================================
+[[kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+[[kv_namespaces]]
+binding = "APP_UPDATE_CONFIG"
+id = "<APP_UPDATE_CONFIG_KV_ID>"
+preview_id = "<APP_UPDATE_CONFIG_KV_PREVIEW_ID>"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"
+database_id = "<D1_DATABASE_ID_DEV>"
+
+# Service binding to AI Worker
+[[services]]
+binding = "AI_WORKER"
+service = "xisper-ai-worker"
+
+# IP-based rate limit (per location): 120 req/min to reduce abuse before auth
+[[ratelimits]]
+name = "IP_RATE_LIMITER"
+namespace_id = "1001"
+[ratelimits.simple]
+limit = 120
+period = 60
+
+# R2 bucket for app releases (pre -> latest publish; requires R2 in CF Console)
+[[r2_buckets]]
+binding = "RELEASES_R2"
+bucket_name = "xisper-releases"
+
+# ============================================
+# Development environment (default)
+# ============================================
+[env.development]
+vars = { ENVIRONMENT = "development", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+# DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env development`
+# SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env development`
+
+[[env.development.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+[[env.development.kv_namespaces]]
+binding = "APP_UPDATE_CONFIG"
+id = "<APP_UPDATE_CONFIG_KV_ID>"
+preview_id = "<APP_UPDATE_CONFIG_KV_PREVIEW_ID>"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"
+database_id = "<D1_DATABASE_ID_DEV>"
+
+[[env.development.services]]
+binding = "AI_WORKER"
+service = "xisper-ai-worker"
+
+[[env.development.ratelimits]]
+name = "IP_RATE_LIMITER"
+namespace_id = "1001"
+[env.development.ratelimits.simple]
+limit = 120
+period = 60
+
+[[env.development.r2_buckets]]
+binding = "RELEASES_R2"
+bucket_name = "xisper-releases"
+
+# ============================================
+# Beta environment (reuses dev resources)
+# ============================================
+[env.beta]
+vars = { ENVIRONMENT = "beta", SERVICE_BASE_URL = "https://<YOUR_BETA_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+# DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env beta`
+# SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env beta`
+routes = [
+  { pattern = "<YOUR_BETA_DOMAIN>", custom_domain = true }
+]
+
+[[env.beta.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"  # Reuse dev KV
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+[[env.beta.kv_namespaces]]
+binding = "APP_UPDATE_CONFIG"
+id = "<APP_UPDATE_CONFIG_KV_ID>"  # Reuse dev KV
+preview_id = "<APP_UPDATE_CONFIG_KV_PREVIEW_ID>"
+
+[[env.beta.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"  # Reuse dev database
+database_id = "<D1_DATABASE_ID_DEV>"  # Reuse dev database
+
+[[env.beta.services]]
+binding = "AI_WORKER"
+service = "xisper-ai-worker-beta"
+
+[[env.beta.ratelimits]]
+name = "IP_RATE_LIMITER"
+namespace_id = "1001"
+[env.beta.ratelimits.simple]
+limit = 120
+period = 60
+
+[[env.beta.r2_buckets]]
+binding = "RELEASES_R2"
+bucket_name = "xisper-releases"
+
+# ============================================
+# Production environment
+# ============================================
+[env.production]
+vars = { ENVIRONMENT = "production", SERVICE_BASE_URL = "https://<YOUR_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+# DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env production`
+# SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env production`
+routes = [
+  { pattern = "<YOUR_DOMAIN>", custom_domain = true }
+]
+
+[[env.production.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+[[env.production.kv_namespaces]]
+binding = "APP_UPDATE_CONFIG"
+id = "<APP_UPDATE_CONFIG_KV_ID_PROD>"
+preview_id = "<APP_UPDATE_CONFIG_KV_ID_PROD>"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-prod"
+database_id = "<D1_DATABASE_ID_PROD>"
+
+[[env.production.services]]
+binding = "AI_WORKER"
+service = "xisper-ai-worker-production"
+
+[[env.production.ratelimits]]
+name = "IP_RATE_LIMITER"
+namespace_id = "1001"
+[env.production.ratelimits.simple]
+limit = 120
+period = 60
+
+[[env.production.r2_buckets]]
+binding = "RELEASES_R2"
+bucket_name = "xisper-releases"

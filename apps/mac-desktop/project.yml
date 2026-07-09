@@ -1,0 +1,84 @@
+name: Xisper
+options:
+  bundleIdPrefix: xyz.hawkeye-xb
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16"
+  generateEmptyDirectories: true
+  defaultConfig: Debug
+  developmentLanguage: en
+  knownRegions:
+    - en
+    - zh-Hans
+    - ja
+
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.7.3"
+
+targets:
+  Xisper:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Xisper
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: Sparkle
+        product: Sparkle
+    settings:
+      base:
+        PRODUCT_NAME: Xisper
+        MARKETING_VERSION: "0.0.0"  # overridden at build time
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.10"
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: Xisper/Xisper.entitlements
+        INFOPLIST_FILE: Xisper/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Xisper
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+        # Beta vs Release bundle ID is overridden at build via:
+        #   xcodebuild ... PRODUCT_BUNDLE_IDENTIFIER=xyz.hawkeye-xb.xisper-mac.beta
+        PRODUCT_BUNDLE_IDENTIFIER: xyz.hawkeye-xb.xisper-mac
+      configs:
+        Debug:
+          CODE_SIGN_STYLE: Automatic
+          DEVELOPMENT_TEAM: 2WJUWVUJBN
+          DEBUG_INFORMATION_FORMAT: dwarf
+          SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+          # DEBUG builds use beta environment (matches local development)
+          PRODUCT_BUNDLE_IDENTIFIER: xyz.hawkeye-xb.xisper-mac.beta
+          PRODUCT_NAME: Xisper-beta
+          INFOPLIST_KEY_CFBundleDisplayName: "Xisper (Beta)"
+          XISPER_URL_SCHEME: xisper-mac-beta
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "Developer ID Application: Zhaowen Li (2WJUWVUJBN)"
+          DEVELOPMENT_TEAM: 2WJUWVUJBN
+          PROVISIONING_PROFILE_SPECIFIER: ""
+          DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+          SWIFT_OPTIMIZATION_LEVEL: "-O"
+          STRIP_SWIFT_SYMBOLS: YES
+          PRODUCT_BUNDLE_IDENTIFIER: xyz.hawkeye-xb.xisper-mac
+          PRODUCT_NAME: Xisper
+          INFOPLIST_KEY_CFBundleDisplayName: Xisper
+          XISPER_URL_SCHEME: xisper-mac
+
+  XisperTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - XisperTests
+    dependencies:
+      - target: Xisper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: xyz.hawkeye-xb.xisper-mac.tests
+        CODE_SIGN_STYLE: Automatic

@@ -1,0 +1,7 @@
+# Cloudflare Pages configuration for admin panel
+# Beta:    pnpm run deploy:beta  -> xisper-admin-beta
+# Prod:    pnpm run deploy:prod  -> xisper-admin
+
+name = "xisper-admin"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"

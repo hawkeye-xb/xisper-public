@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Near-transparent background: alpha ~5/255, prevents click-through in DMG on older macOS -->
+  <rect width="1024" height="1024" fill="white" fill-opacity="0.02"/>
+  <circle cx="512" cy="512" r="430" fill="none" stroke="#007C8B" stroke-width="61"/>
+  <line x1="207.9" y1="207.9" x2="323.6" y2="323.6" stroke="#007C8B" stroke-width="61" stroke-linecap="square"/>
+  <line x1="816.1" y1="207.9" x2="700.4" y2="323.6" stroke="#007C8B" stroke-width="61" stroke-linecap="square"/>
+  <line x1="207.9" y1="816.1" x2="323.6" y2="700.4" stroke="#007C8B" stroke-width="61" stroke-linecap="square"/>
+  <line x1="816.1" y1="816.1" x2="700.4" y2="700.4" stroke="#007C8B" stroke-width="61" stroke-linecap="square"/>
+  <rect x="358" y="414" width="62" height="196" fill="#007C8B"/>
+  <rect x="481" y="358" width="62" height="308" fill="#007C8B"/>
+  <rect x="604" y="414" width="62" height="196" fill="#007C8B"/>
+</svg>

@@ -1,0 +1,76 @@
+{
+  "title": "ASR Recording: Normal Flow",
+  "actors": [
+    { "label": "User",                "color": "yellow" },
+    { "label": "RecordingCoordinator", "color": "orange" },
+    { "label": "AudioEngine",         "color": "yellow" },
+    { "label": "ASRClient",           "color": "blue"   },
+    { "label": "CF Worker Proxy",     "color": "purple" },
+    { "label": "ASR Adapter",         "color": "green"  }
+  ],
+  "steps": [
+    {
+      "actor": "User",
+      "text":  "1. Press FN\nStart recording"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "2. Generate recordingId\nstate = .recording\nInit Queue A + Queue B",
+      "from":  "User",
+      "arrow": "FN key event"
+    },
+    {
+      "actor": "ASRClient",
+      "text":  "3. connect(token, url)\nsendStart(config)\nwith recordingId",
+      "from":  "RecordingCoordinator",
+      "arrow": "WS connect"
+    },
+    {
+      "actor": "AudioEngine",
+      "text":  "4. Start capture\n16kHz mono PCM\n~3.2KB per 100ms",
+      "from":  "RecordingCoordinator",
+      "arrow": "start()"
+    },
+    {
+      "actor": "CF Worker Proxy",
+      "text":  "5. Accept WS\nBuffer PCM (messageBuffer)\nConnect to ASR upstream",
+      "from":  "ASRClient",
+      "arrow": "WS upgrade"
+    },
+    {
+      "actor": "ASR Adapter",
+      "text":  "6. adapter.sendAudio()\nFun-ASR: raw binary\nQwen3: base64 JSON\n(auto-split >180KB)",
+      "from":  "CF Worker Proxy",
+      "arrow": "PCM frames"
+    },
+    {
+      "actor": "CF Worker Proxy",
+      "text":  "7. Receive results\nNormalize events\nAccumulate definite text\nIncremental billing",
+      "from":  "ASR Adapter",
+      "arrow": "ASR results",
+      "style": "dashed"
+    },
+    {
+      "actor": "ASRClient",
+      "text":  "8. onResult callback\nAccumulate text in memory\n(no persist, no UI text)",
+      "from":  "CF Worker Proxy",
+      "arrow": "NormalizedASREvent",
+      "style": "dashed"
+    },
+    {
+      "actor": "User",
+      "text":  "9. Press FN again\nStop recording"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "10. Drain Queue A remains\nsendFinish()\nwaitForFinal()\nGet final text",
+      "from":  "User",
+      "arrow": "FN key event"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "11. Persist to SwiftData\nLLM postprocess\nUpdate record\nInject text\nSave WAV (Queue B)",
+      "color": "green"
+    }
+  ]
+}

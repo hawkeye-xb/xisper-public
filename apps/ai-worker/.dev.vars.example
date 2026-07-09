@@ -1,0 +1,8 @@
+# CN direct providers (fastest for CN users, bypass AI Gateway)
+ZHIPU_API_KEY=your-zhipu-api-key
+ALIBABA_API_KEY=your-alibaba-dashscope-api-key
+
+# AI Gateway providers (Groq > Gemini > DeepSeek)
+GROQ_API_KEY=gsk_your-groq-api-key
+GEMINI_API_KEY=your-gemini-api-key
+DEEPSEEK_API_KEY=your-deepseek-api-key

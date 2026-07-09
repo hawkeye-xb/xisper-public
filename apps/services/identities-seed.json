@@ -1,0 +1,4299 @@
+[
+  {
+    "id": "developer",
+    "label": "程序员",
+    "description": "软件开发、编程、DevOps。涵盖前后端、框架、工具链、基础设施等编程领域术语。",
+    "enabled": true,
+    "vocabularyId": "vocab-xpdev-c74327650dd443a68c2eef053dcc1d5f",
+    "hotwords": [
+      {
+        "text": "Xcode",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "VS Code",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "IntelliJ",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Cursor",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Copilot",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Claude",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ChatGPT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Vim",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Neovim",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "npm",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "pnpm",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "yarn",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Vite",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "webpack",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Turbo",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Turborepo",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "monorepo",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "CocoaPods",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Swift Package Manager",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Gradle",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Maven",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "pip",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "cargo",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "TypeScript",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "JavaScript",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Python",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Swift",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "SwiftUI",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Kotlin",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Rust",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Go",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Golang",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "React",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Vue",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Next.js",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Nuxt",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Angular",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Svelte",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Electron",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Tauri",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "NestJS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Express",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Hono",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Django",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Flask",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Spring Boot",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Laravel",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Flutter",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "React Native",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Docker",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Kubernetes",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "K8s",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Cloudflare",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "Cloudflare Workers",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "AWS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Vercel",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Netlify",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Nginx",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Redis",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "PostgreSQL",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "MongoDB",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "MySQL",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SQLite",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Supabase",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Firebase",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Git",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "GitHub",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "GitLab",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CI/CD",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "GitHub Actions",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PR",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "pull request",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "merge",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "rebase",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "commit",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "branch",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "API",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "SDK",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "REST",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "GraphQL",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "WebSocket",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "gRPC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "OAuth",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "JWT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CORS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SSL",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "HTTPS",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "DNS",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "CDN",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SSH",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "dev",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "prod",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "pre",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "staging",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "localhost",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "debug",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "deploy",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "refactor",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "async",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "callback",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "middleware",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "endpoint",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "token",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "schema",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "config",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "mock",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "lint",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ESLint",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Prettier",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "鉴权",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "注释",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "注解",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "编译",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "调试",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "接口",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "缓存",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "渲染",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "递归",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "路由",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "重构",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "依赖",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "脚手架",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "沙箱",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "序列化",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "泛型",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "枚举",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "闭包",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "解耦",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "幂等",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "熔断",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "灰度",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "回滚",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "部署",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "迭代",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "封装",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "继承",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "多态",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "抽象",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "中间件",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "微服务",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "容器",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "镜像",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "异步",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "同步",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "前端",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "后端",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "全栈",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "组件",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "模块",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "实例",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "哈希",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "堆栈",
+        "weight": 4,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "鉴权",
+        "misheard": [
+          "健全",
+          "检权",
+          "间权",
+          "建权"
+        ],
+        "note": "authentication/authorization"
+      },
+      {
+        "correct": "注释",
+        "misheard": [
+          "注射",
+          "住是",
+          "主食",
+          "注是"
+        ],
+        "note": "code comment"
+      },
+      {
+        "correct": "注解",
+        "misheard": [
+          "主街",
+          "注街"
+        ],
+        "note": "annotation"
+      },
+      {
+        "correct": "依赖",
+        "misheard": [
+          "一来",
+          "一赖",
+          "已赖"
+        ],
+        "note": "dependency"
+      },
+      {
+        "correct": "编译",
+        "misheard": [
+          "编一",
+          "变异",
+          "编艺"
+        ],
+        "note": "compile"
+      },
+      {
+        "correct": "调试",
+        "misheard": [
+          "调事",
+          "调是",
+          "掉试"
+        ],
+        "note": "debug"
+      },
+      {
+        "correct": "接口",
+        "misheard": [
+          "节口",
+          "结口",
+          "截口"
+        ],
+        "note": "API/interface"
+      },
+      {
+        "correct": "缓存",
+        "misheard": [
+          "换存",
+          "缓村",
+          "还存"
+        ],
+        "note": "cache"
+      },
+      {
+        "correct": "渲染",
+        "misheard": [
+          "选染",
+          "宣染",
+          "旋染"
+        ],
+        "note": "render"
+      },
+      {
+        "correct": "递归",
+        "misheard": [
+          "地归",
+          "低归",
+          "帝归"
+        ],
+        "note": "recursion"
+      },
+      {
+        "correct": "路由",
+        "misheard": [
+          "路游",
+          "陆游",
+          "路邮"
+        ],
+        "note": "routing"
+      },
+      {
+        "correct": "重构",
+        "misheard": [
+          "重购",
+          "重够",
+          "从构"
+        ],
+        "note": "refactor"
+      },
+      {
+        "correct": "脚手架",
+        "misheard": [
+          "叫手架",
+          "角手架"
+        ],
+        "note": "scaffold"
+      },
+      {
+        "correct": "沙箱",
+        "misheard": [
+          "沙厢",
+          "沙乡",
+          "砂箱"
+        ],
+        "note": "sandbox"
+      },
+      {
+        "correct": "序列化",
+        "misheard": [
+          "续列化",
+          "叙列化"
+        ],
+        "note": "serialization"
+      },
+      {
+        "correct": "反序列化",
+        "misheard": [
+          "返序列化",
+          "反叙列化"
+        ],
+        "note": "deserialization"
+      },
+      {
+        "correct": "泛型",
+        "misheard": [
+          "范型",
+          "饭型",
+          "凡型"
+        ],
+        "note": "generics"
+      },
+      {
+        "correct": "枚举",
+        "misheard": [
+          "没举",
+          "美举",
+          "梅举"
+        ],
+        "note": "enum"
+      },
+      {
+        "correct": "闭包",
+        "misheard": [
+          "逼包",
+          "避包",
+          "毕包"
+        ],
+        "note": "closure"
+      },
+      {
+        "correct": "解耦",
+        "misheard": [
+          "解构",
+          "解偶",
+          "接偶"
+        ],
+        "note": "decoupling"
+      },
+      {
+        "correct": "幂等",
+        "misheard": [
+          "密等",
+          "迷等",
+          "米等"
+        ],
+        "note": "idempotent"
+      },
+      {
+        "correct": "熔断",
+        "misheard": [
+          "融断",
+          "容断"
+        ],
+        "note": "circuit breaker"
+      },
+      {
+        "correct": "灰度",
+        "misheard": [
+          "回度",
+          "辉度",
+          "挥度"
+        ],
+        "note": "canary/grayscale release"
+      },
+      {
+        "correct": "回滚",
+        "misheard": [
+          "回归",
+          "回棍"
+        ],
+        "note": "rollback"
+      },
+      {
+        "correct": "中间件",
+        "misheard": [
+          "中坚件",
+          "中健件"
+        ],
+        "note": "middleware"
+      },
+      {
+        "correct": "微服务",
+        "misheard": [
+          "为服务",
+          "威服务"
+        ],
+        "note": "microservice"
+      },
+      {
+        "correct": "容器",
+        "misheard": [
+          "溶器",
+          "融器",
+          "荣器"
+        ],
+        "note": "container"
+      },
+      {
+        "correct": "镜像",
+        "misheard": [
+          "景象",
+          "近像",
+          "境象"
+        ],
+        "note": "image (Docker)"
+      },
+      {
+        "correct": "实例",
+        "misheard": [
+          "事例",
+          "示例"
+        ],
+        "note": "instance"
+      },
+      {
+        "correct": "异步",
+        "misheard": [
+          "一步",
+          "以步",
+          "义步"
+        ],
+        "note": "async"
+      },
+      {
+        "correct": "同步",
+        "misheard": [
+          "同不",
+          "通步"
+        ],
+        "note": "sync"
+      },
+      {
+        "correct": "部署",
+        "misheard": [
+          "布署",
+          "步署"
+        ],
+        "note": "deploy"
+      },
+      {
+        "correct": "迭代",
+        "misheard": [
+          "叠代",
+          "跌代",
+          "迭带"
+        ],
+        "note": "iteration"
+      },
+      {
+        "correct": "封装",
+        "misheard": [
+          "风装",
+          "丰装",
+          "峰装"
+        ],
+        "note": "encapsulation"
+      },
+      {
+        "correct": "继承",
+        "misheard": [
+          "及承",
+          "即承",
+          "积成"
+        ],
+        "note": "inheritance"
+      },
+      {
+        "correct": "多态",
+        "misheard": [
+          "多胎",
+          "多太"
+        ],
+        "note": "polymorphism"
+      },
+      {
+        "correct": "抽象",
+        "misheard": [
+          "愁想",
+          "筹象"
+        ],
+        "note": "abstraction"
+      },
+      {
+        "correct": "栈",
+        "misheard": [
+          "站",
+          "战",
+          "占"
+        ],
+        "note": "stack"
+      },
+      {
+        "correct": "堆",
+        "misheard": [
+          "对",
+          "队"
+        ],
+        "note": "heap"
+      },
+      {
+        "correct": "哈希",
+        "misheard": [
+          "哈西",
+          "哈嘻"
+        ],
+        "note": "hash"
+      }
+    ],
+    "correctionCount": 40
+  },
+  {
+    "id": "general-tech",
+    "label": "通用科技",
+    "description": "Common tech brand and product name corrections",
+    "enabled": true,
+    "vocabularyId": "vocab-xpgtech-531a2c66b2f34e22b80ba7b5fdb531a2",
+    "hotwords": [
+      {
+        "text": "Lambda",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "S3",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "EC2",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "RDS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DynamoDB",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CloudFront",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SQS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SNS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "IAM",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "VPC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "BigQuery",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Dataflow",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Compute Engine",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Cloud Storage",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Cloud SQL",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Firebase",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Azure VM",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Azure SQL",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Blob Storage",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Cosmos DB",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Function App",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DNS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CDN",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "SSL",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "TLS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "HTTPS",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "TCP/IP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "UDP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ICMP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SNMP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "BGP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "OSPF",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "MPLS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "VPN",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "WebRTC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "RTMP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "HLS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DASH",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "XSS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CSRF",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SQL injection",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "OAuth",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "JWT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SAML",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SSO",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "LDAP",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "OIDC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PKI",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "RSA",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "AES",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SHA",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "HTTPS证书",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "公钥",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "私钥",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "加密",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "解密",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "哈希",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "防火墙",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "IDS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "IPS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "WAF",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DDoS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "漏洞扫描",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "渗透测试",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "安全审计",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "数据加密",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "数据脱敏",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "备份恢复",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "容灾",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "高可用",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "多活",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "灾备",
+        "weight": 3,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "Claude",
+        "misheard": [
+          "克劳德",
+          "克老的",
+          "克罗德"
+        ],
+        "note": "Anthropic AI model"
+      },
+      {
+        "correct": "Anthropic",
+        "misheard": [
+          "安索品",
+          "安索匹克",
+          "安思罗匹克"
+        ],
+        "note": "AI company"
+      },
+      {
+        "correct": "OpenAI",
+        "misheard": [
+          "欧盆AI",
+          "偶喷AI"
+        ],
+        "note": "AI company"
+      },
+      {
+        "correct": "ChatGPT",
+        "misheard": [
+          "恰特GPT",
+          "差特GPT"
+        ],
+        "note": "AI chatbot"
+      },
+      {
+        "correct": "GPT",
+        "misheard": [
+          "吉批T",
+          "鸡批踢"
+        ],
+        "note": "Generative Pre-trained Transformer"
+      },
+      {
+        "correct": "Gemini",
+        "misheard": [
+          "杰米尼",
+          "洁米妮"
+        ],
+        "note": "Google AI model"
+      },
+      {
+        "correct": "Deepseek",
+        "misheard": [
+          "迪普西克",
+          "地铺思科"
+        ],
+        "note": "AI company"
+      },
+      {
+        "correct": "LLM",
+        "misheard": [
+          "爱奥M",
+          "LOM",
+          "尔噜M"
+        ],
+        "note": "Large Language Model"
+      },
+      {
+        "correct": "AGI",
+        "misheard": [
+          "爱鸡爱",
+          "阿吉爱"
+        ],
+        "note": "Artificial General Intelligence"
+      },
+      {
+        "correct": "RAG",
+        "misheard": [
+          "拉格",
+          "蕊阿歌"
+        ],
+        "note": "Retrieval Augmented Generation"
+      },
+      {
+        "correct": "prompt",
+        "misheard": [
+          "普朗普特",
+          "铺入母普特"
+        ],
+        "note": "AI prompt"
+      },
+      {
+        "correct": "fine-tune",
+        "misheard": [
+          "法恩吞",
+          "凡恩吞"
+        ],
+        "note": "model fine-tuning"
+      },
+      {
+        "correct": "embedding",
+        "misheard": [
+          "恩贝丁",
+          "嵌入"
+        ],
+        "note": "vector embedding"
+      },
+      {
+        "correct": "Cloudflare",
+        "misheard": [
+          "克劳德弗莱尔",
+          "克老的佛莱"
+        ],
+        "note": "cloud platform"
+      },
+      {
+        "correct": "Vercel",
+        "misheard": [
+          "维尔赛",
+          "沃赛尔"
+        ],
+        "note": "deployment platform"
+      },
+      {
+        "correct": "Supabase",
+        "misheard": [
+          "苏帕贝斯",
+          "苏巴北斯"
+        ],
+        "note": "BaaS platform"
+      },
+      {
+        "correct": "Figma",
+        "misheard": [
+          "菲格玛",
+          "飞哥玛"
+        ],
+        "note": "design tool"
+      },
+      {
+        "correct": "Notion",
+        "misheard": [
+          "诺升",
+          "挪盛"
+        ],
+        "note": "productivity tool"
+      },
+      {
+        "correct": "Cursor",
+        "misheard": [
+          "科色",
+          "克瑟"
+        ],
+        "note": "AI code editor"
+      },
+      {
+        "correct": "VS Code",
+        "misheard": [
+          "VS扣的",
+          "维爱斯扣的"
+        ],
+        "note": "code editor"
+      },
+      {
+        "correct": "GitHub",
+        "misheard": [
+          "给特哈布",
+          "吉特哈布"
+        ],
+        "note": "code hosting"
+      },
+      {
+        "correct": "GitLab",
+        "misheard": [
+          "给特拉布",
+          "吉特拉布"
+        ],
+        "note": "DevOps platform"
+      },
+      {
+        "correct": "SaaS",
+        "misheard": [
+          "萨斯",
+          "飒斯"
+        ],
+        "note": "Software as a Service"
+      },
+      {
+        "correct": "IaaS",
+        "misheard": [
+          "爱阿斯",
+          "牙斯"
+        ],
+        "note": "Infrastructure as a Service"
+      },
+      {
+        "correct": "MCP",
+        "misheard": [
+          "爱母西屁",
+          "莫赛铺"
+        ],
+        "note": "Model Context Protocol"
+      },
+      {
+        "correct": "MVP",
+        "misheard": [
+          "爱母微批",
+          "莫微铺"
+        ],
+        "note": "Minimum Viable Product"
+      },
+      {
+        "correct": "KPI",
+        "misheard": [
+          "K批爱",
+          "开辟爱"
+        ],
+        "note": "Key Performance Indicator"
+      },
+      {
+        "correct": "OKR",
+        "misheard": [
+          "欧K阿",
+          "偶开啊"
+        ],
+        "note": "Objectives and Key Results"
+      },
+      {
+        "correct": "WiFi",
+        "misheard": [
+          "歪发",
+          "外发"
+        ],
+        "note": "wireless network"
+      },
+      {
+        "correct": "Bluetooth",
+        "misheard": [
+          "不露吐丝",
+          "布鲁图斯"
+        ],
+        "note": "wireless protocol"
+      }
+    ]
+  },
+  {
+    "id": "doctor",
+    "label": "医生",
+    "description": "Medical terminology corrections",
+    "enabled": true,
+    "vocabularyId": "vocab-xpdoc-315889d05d7c4771a2a5080fcede378e",
+    "hotwords": [
+      {
+        "text": "内分泌科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "消化内科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "神经外科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "骨科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "妇产科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "心内科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "呼吸科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肾内科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "风湿免疫科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "血液科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肿瘤科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "放射肿瘤科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "皮肤科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "眼科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "耳鼻喉科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "神经内科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "精神心理科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "儿科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "新生儿科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "泌尿外科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肛肠科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "普外科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "心外科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "胸外科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "整形美容科",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "氯吡格雷",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "阿托伐他汀",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "二甲双胍",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "左氧氟沙星",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "头孢克洛",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "阿司匹林",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "洛伐他汀",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "美托洛尔",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "阿卡波糖",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "吲达帕胺",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "氨氯地平",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "普利类",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "沙坦类",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "他汀类",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "抗生素",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "激素",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "免疫球蛋白",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "内窥镜",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "心导管",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "支架植入",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "微创手术",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "腹腔镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "胸腔镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "关节镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "膀胱镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "纤维支气管镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "食管镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "胃镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "结肠镜",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肝功能",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "肾功能",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "血常规",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "尿常规",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "糖化血红蛋白",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "C反应蛋白",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肿瘤标志物",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "PSA",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "CEA",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "AFP",
+        "weight": 5,
+        "lang": "en"
+      },
+      {
+        "text": "CA",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "INR",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "TPR",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "HIV",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DNA",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "RNA",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "PCR",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "BMI",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ECG",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "EEG",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "MRI",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "X光",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "超声",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "PET-CT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "肺炎",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "糖尿病",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "高血压",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "冠心病",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "心肌梗死",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "脑卒中",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "中风",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "肝硬化",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肾衰竭",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "尿毒症",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "癌症",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "白血病",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "淋巴瘤",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "艾滋病",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肝炎",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "乙肝",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "结核病",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "甲状腺",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "胰岛素",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "骨密度",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "钙质疏松",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "脊椎",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "颅骨",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "股骨",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "膝关节",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肩关节",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "肘关节",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "腕关节",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "踝关节",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "脑脊液",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "动脉",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "静脉",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "毛细血管",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "血小板",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "白细胞",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "红细胞",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "淋巴细胞",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "中性粒细胞",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "单核细胞",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "嗜酸粒细胞",
+        "weight": 4,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "CT",
+        "misheard": [
+          "西踢",
+          "CT扫描"
+        ],
+        "note": "computed tomography"
+      },
+      {
+        "correct": "MRI",
+        "misheard": [
+          "爱母阿爱",
+          "核磁"
+        ],
+        "note": "magnetic resonance imaging"
+      },
+      {
+        "correct": "ICU",
+        "misheard": [
+          "爱西油",
+          "挨西优"
+        ],
+        "note": "intensive care unit"
+      },
+      {
+        "correct": "ECG",
+        "misheard": [
+          "一西鸡",
+          "心电"
+        ],
+        "note": "electrocardiogram"
+      },
+      {
+        "correct": "B超",
+        "misheard": [
+          "B炒",
+          "比超"
+        ],
+        "note": "ultrasound"
+      },
+      {
+        "correct": "青霉素",
+        "misheard": [
+          "清美素",
+          "轻眉素"
+        ],
+        "note": "penicillin"
+      },
+      {
+        "correct": "阿莫西林",
+        "misheard": [
+          "阿莫斯林",
+          "阿莫希林"
+        ],
+        "note": "amoxicillin"
+      },
+      {
+        "correct": "布洛芬",
+        "misheard": [
+          "不落分",
+          "步洛分"
+        ],
+        "note": "ibuprofen"
+      },
+      {
+        "correct": "头孢",
+        "misheard": [
+          "头炮",
+          "头泡"
+        ],
+        "note": "cephalosporin"
+      },
+      {
+        "correct": "胰岛素",
+        "misheard": [
+          "一到素",
+          "遗道素"
+        ],
+        "note": "insulin"
+      },
+      {
+        "correct": "血红蛋白",
+        "misheard": [
+          "血红蛋白白",
+          "雪红蛋白"
+        ],
+        "note": "hemoglobin"
+      },
+      {
+        "correct": "白细胞",
+        "misheard": [
+          "白戏包",
+          "白洗包"
+        ],
+        "note": "leukocyte"
+      },
+      {
+        "correct": "血小板",
+        "misheard": [
+          "雪小板",
+          "血小半"
+        ],
+        "note": "platelet"
+      },
+      {
+        "correct": "甲状腺",
+        "misheard": [
+          "假装线",
+          "甲状线"
+        ],
+        "note": "thyroid"
+      },
+      {
+        "correct": "胆固醇",
+        "misheard": [
+          "胆固纯",
+          "单固醇"
+        ],
+        "note": "cholesterol"
+      },
+      {
+        "correct": "幽门螺杆菌",
+        "misheard": [
+          "有门螺杆菌",
+          "幽门落杆菌"
+        ],
+        "note": "H. pylori"
+      },
+      {
+        "correct": "支气管炎",
+        "misheard": [
+          "支气管言",
+          "只气管炎"
+        ],
+        "note": "bronchitis"
+      },
+      {
+        "correct": "阑尾炎",
+        "misheard": [
+          "蓝尾炎",
+          "栏尾炎"
+        ],
+        "note": "appendicitis"
+      },
+      {
+        "correct": "糖尿病",
+        "misheard": [
+          "糖鸟病",
+          "唐尿病"
+        ],
+        "note": "diabetes"
+      },
+      {
+        "correct": "高血压",
+        "misheard": [
+          "搞血压",
+          "高雪压"
+        ],
+        "note": "hypertension"
+      },
+      {
+        "correct": "心肌梗塞",
+        "misheard": [
+          "心肌更塞",
+          "心机梗塞"
+        ],
+        "note": "myocardial infarction"
+      },
+      {
+        "correct": "脑卒中",
+        "misheard": [
+          "脑足中",
+          "脑猝中"
+        ],
+        "note": "stroke"
+      },
+      {
+        "correct": "肺栓塞",
+        "misheard": [
+          "肺拴塞",
+          "废栓塞"
+        ],
+        "note": "pulmonary embolism"
+      },
+      {
+        "correct": "抗生素",
+        "misheard": [
+          "抗身素",
+          "康生素"
+        ],
+        "note": "antibiotics"
+      },
+      {
+        "correct": "麻醉",
+        "misheard": [
+          "嘛醉",
+          "马醉"
+        ],
+        "note": "anesthesia"
+      }
+    ]
+  },
+  {
+    "id": "lawyer",
+    "label": "律师",
+    "description": "Legal terminology corrections",
+    "enabled": true,
+    "vocabularyId": "vocab-xplaw-f8688c5d1dab4e1eae89783275bb56e1",
+    "hotwords": [
+      {
+        "text": "民法典",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "刑法",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "合同法",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "劳动法",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "公司法",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "反垄断法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "知识产权法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "国际法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "宪法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "行政法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "税法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "环境法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "建筑法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "专利法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "商标法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "著作权法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "食品安全法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "消费者保护法",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "立案",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "开庭",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "质证",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "辩论",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "宣判",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "执行",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "上诉",
+        "weight": 5,
+        "lang": "zh"
+      },
+      {
+        "text": "再审",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "调解",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "仲裁",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "诉讼时效",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "举证责任",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "证人",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "鉴定人",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "代理人",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "法人代表",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "合伙企业",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "有限责任公司",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "股份有限公司",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "分公司",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "子公司",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "董事会",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "监事会",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "股东大会",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "bona fide",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "pro bono",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ad hoc",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "amicus curiae",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "pro tempore",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "habeas corpus",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "mens rea",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "actus reus",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ipso facto",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "subpoena",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PCT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "WIPO",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "优先权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "发明专利",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "实用新型",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "外观设计",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "著作权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "商标权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "商业秘密",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "侵权",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "赔偿",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "合同条款",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "违约",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "免责条款",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "不可抗力",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "仲裁条款",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "管辖权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "审判权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "诉讼权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "抗辩权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "请求权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "债权",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "债务",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "担保物权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "抵押权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "质押权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "留置权",
+        "weight": 4,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "原告",
+        "misheard": [
+          "圆告",
+          "元告"
+        ],
+        "note": "plaintiff"
+      },
+      {
+        "correct": "被告",
+        "misheard": [
+          "被搞",
+          "备告"
+        ],
+        "note": "defendant"
+      },
+      {
+        "correct": "辩护人",
+        "misheard": [
+          "变护人",
+          "辨护人"
+        ],
+        "note": "defense counsel"
+      },
+      {
+        "correct": "诉讼",
+        "misheard": [
+          "诉松",
+          "苏送"
+        ],
+        "note": "litigation"
+      },
+      {
+        "correct": "仲裁",
+        "misheard": [
+          "中才",
+          "忠裁"
+        ],
+        "note": "arbitration"
+      },
+      {
+        "correct": "公诉",
+        "misheard": [
+          "工诉",
+          "弓诉"
+        ],
+        "note": "prosecution"
+      },
+      {
+        "correct": "管辖权",
+        "misheard": [
+          "管下权",
+          "管辖全"
+        ],
+        "note": "jurisdiction"
+      },
+      {
+        "correct": "保全",
+        "misheard": [
+          "宝全",
+          "保权"
+        ],
+        "note": "preservation"
+      },
+      {
+        "correct": "追诉时效",
+        "misheard": [
+          "追诉失效",
+          "追述时效"
+        ],
+        "note": "statute of limitations"
+      },
+      {
+        "correct": "侵权",
+        "misheard": [
+          "亲权",
+          "侵全"
+        ],
+        "note": "tort/infringement"
+      },
+      {
+        "correct": "合同纠纷",
+        "misheard": [
+          "河同纠纷",
+          "和同纠纷"
+        ],
+        "note": "contract dispute"
+      },
+      {
+        "correct": "知识产权",
+        "misheard": [
+          "知识产全",
+          "支撑产权"
+        ],
+        "note": "intellectual property"
+      },
+      {
+        "correct": "著作权",
+        "misheard": [
+          "著作全",
+          "助作权"
+        ],
+        "note": "copyright"
+      },
+      {
+        "correct": "商标权",
+        "misheard": [
+          "商标全",
+          "伤标权"
+        ],
+        "note": "trademark right"
+      },
+      {
+        "correct": "专利",
+        "misheard": [
+          "砖利",
+          "传利"
+        ],
+        "note": "patent"
+      },
+      {
+        "correct": "股权",
+        "misheard": [
+          "古权",
+          "顾权"
+        ],
+        "note": "equity"
+      },
+      {
+        "correct": "债权",
+        "misheard": [
+          "寨权",
+          "在权"
+        ],
+        "note": "creditor's right"
+      },
+      {
+        "correct": "抵押",
+        "misheard": [
+          "底压",
+          "地压"
+        ],
+        "note": "mortgage"
+      },
+      {
+        "correct": "担保",
+        "misheard": [
+          "但保",
+          "旦保"
+        ],
+        "note": "guarantee"
+      },
+      {
+        "correct": "民事",
+        "misheard": [
+          "名事",
+          "明事"
+        ],
+        "note": "civil"
+      },
+      {
+        "correct": "刑事",
+        "misheard": [
+          "行事",
+          "型事"
+        ],
+        "note": "criminal"
+      },
+      {
+        "correct": "行政诉讼",
+        "misheard": [
+          "行政诉松",
+          "行政苏送"
+        ],
+        "note": "administrative litigation"
+      },
+      {
+        "correct": "司法鉴定",
+        "misheard": [
+          "丝法鉴定",
+          "四法鉴定"
+        ],
+        "note": "forensic evaluation"
+      },
+      {
+        "correct": "法律顾问",
+        "misheard": [
+          "法律固问",
+          "法律故问"
+        ],
+        "note": "legal counsel"
+      },
+      {
+        "correct": "尽职调查",
+        "misheard": [
+          "近职调查",
+          "紧致调查"
+        ],
+        "note": "due diligence"
+      }
+    ]
+  },
+  {
+    "id": "product-manager",
+    "label": "产品经理",
+    "description": "Product management terminology corrections",
+    "enabled": true,
+    "vocabularyId": "vocab-xppm-9535dbfd0d5b4b28adc06c3a7bd7b30f",
+    "hotwords": [
+      {
+        "text": "Scrum",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Kanban",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Agile",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Sprint",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Backlog",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Retrospective",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "standup",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "user story",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "epic",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "story points",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "velocity",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "burndown",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "roadmap",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "cohort",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "funnel",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "attribution",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "churn rate",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "LTV",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "lifetime value",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ARPU",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ARPPU",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CAC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "DAU",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "MAU",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "retention rate",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "conversion rate",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "activation",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "engagement",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "wireframe",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "prototype",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "mockup",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "user flow",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "journey map",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "persona",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "use case",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "information architecture",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "UX",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "UI",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "A/B test",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "multivariate test",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "freemium",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "subscription",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "marketplace",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "platform",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "tiered pricing",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "value proposition",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "competitive advantage",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "market positioning",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "go-to-market",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Jira",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "Asana",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Monday.com",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ClickUp",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Linear",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Notion",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Figma",
+        "weight": 3,
+        "lang": "en"
+      },
+      {
+        "text": "Miro",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "产品需求文档",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "用户故事",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "原型设计",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "用户研究",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "竞品分析",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "市场分析",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "产品迭代",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "功能发布",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "增长黑客",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "数据驱动",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "用户体验",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "用户满意度",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "产品战略",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "商业模式",
+        "weight": 4,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "PRD",
+        "misheard": [
+          "皮啊D",
+          "批阿D"
+        ],
+        "note": "Product Requirements Document"
+      },
+      {
+        "correct": "MVP",
+        "misheard": [
+          "爱母微批",
+          "M微P"
+        ],
+        "note": "Minimum Viable Product"
+      },
+      {
+        "correct": "OKR",
+        "misheard": [
+          "欧K啊",
+          "偶开啊"
+        ],
+        "note": "Objectives and Key Results"
+      },
+      {
+        "correct": "KPI",
+        "misheard": [
+          "K批爱",
+          "开辟爱"
+        ],
+        "note": "Key Performance Indicator"
+      },
+      {
+        "correct": "ROI",
+        "misheard": [
+          "阿偶爱",
+          "如偶爱"
+        ],
+        "note": "Return on Investment"
+      },
+      {
+        "correct": "DAU",
+        "misheard": [
+          "D爱油",
+          "呆油"
+        ],
+        "note": "Daily Active Users"
+      },
+      {
+        "correct": "MAU",
+        "misheard": [
+          "M爱油",
+          "冒油"
+        ],
+        "note": "Monthly Active Users"
+      },
+      {
+        "correct": "GMV",
+        "misheard": [
+          "吉M微",
+          "G爱母微"
+        ],
+        "note": "Gross Merchandise Volume"
+      },
+      {
+        "correct": "SaaS",
+        "misheard": [
+          "萨斯",
+          "飒斯"
+        ],
+        "note": "Software as a Service"
+      },
+      {
+        "correct": "B端",
+        "misheard": [
+          "B段",
+          "币端"
+        ],
+        "note": "Business-facing"
+      },
+      {
+        "correct": "C端",
+        "misheard": [
+          "C段",
+          "西端"
+        ],
+        "note": "Consumer-facing"
+      },
+      {
+        "correct": "用户画像",
+        "misheard": [
+          "用户画象",
+          "永户画像"
+        ],
+        "note": "user persona"
+      },
+      {
+        "correct": "留存率",
+        "misheard": [
+          "流存率",
+          "留村率"
+        ],
+        "note": "retention rate"
+      },
+      {
+        "correct": "转化率",
+        "misheard": [
+          "砖化率",
+          "转话率"
+        ],
+        "note": "conversion rate"
+      },
+      {
+        "correct": "漏斗",
+        "misheard": [
+          "陋斗",
+          "漏逗"
+        ],
+        "note": "funnel"
+      },
+      {
+        "correct": "迭代",
+        "misheard": [
+          "叠代",
+          "碟代"
+        ],
+        "note": "iteration"
+      },
+      {
+        "correct": "复盘",
+        "misheard": [
+          "付盘",
+          "福盘"
+        ],
+        "note": "retrospective"
+      },
+      {
+        "correct": "需求评审",
+        "misheard": [
+          "需求凭审",
+          "需求平审"
+        ],
+        "note": "requirements review"
+      },
+      {
+        "correct": "灰度发布",
+        "misheard": [
+          "灰度发不",
+          "回度发布"
+        ],
+        "note": "canary release"
+      },
+      {
+        "correct": "A/B测试",
+        "misheard": [
+          "AB测试",
+          "爱逼测试"
+        ],
+        "note": "A/B testing"
+      },
+      {
+        "correct": "埋点",
+        "misheard": [
+          "买点",
+          "卖点"
+        ],
+        "note": "event tracking"
+      },
+      {
+        "correct": "数据看板",
+        "misheard": [
+          "数据砍板",
+          "数据看半"
+        ],
+        "note": "dashboard"
+      },
+      {
+        "correct": "用户体验",
+        "misheard": [
+          "用户体延",
+          "永户体验"
+        ],
+        "note": "user experience"
+      },
+      {
+        "correct": "交互设计",
+        "misheard": [
+          "焦湖设计",
+          "交护设计"
+        ],
+        "note": "interaction design"
+      },
+      {
+        "correct": "竞品分析",
+        "misheard": [
+          "金品分析",
+          "竞品分西"
+        ],
+        "note": "competitive analysis"
+      }
+    ]
+  },
+  {
+    "id": "finance",
+    "label": "金融",
+    "description": "Finance and investment terminology corrections",
+    "enabled": true,
+    "vocabularyId": "vocab-xpfin-458fa7591c0248bf80b24d629d8a28f8",
+    "hotwords": [
+      {
+        "text": "可转债",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "永续债",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "ABS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "MBS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CDS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "CDO",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "SPAC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "IPO",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "做空",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "做多",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "对冲",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "套利",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "止损",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "止盈",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "平仓",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "开仓",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "爆仓",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "融资",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "融券",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "杠杆",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "期权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "期货",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "看涨",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "看跌",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "行权",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "权利金",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "EBITDA",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ROE",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "ROA",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PB",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PS",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "PE",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "EV",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "IRR",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "NPV",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "FCF",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "负债率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "流动比率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "速动比率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "现金流",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "营运资金",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "资本回报率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "证监会",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "银保监会",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "合规审查",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "反洗钱",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "KYC",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "AML",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "KYB",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "风险管理",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "投资组合",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "资产配置",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "分散投资",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "系统性风险",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "非系统性风险",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "贝塔系数",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "方差",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "标准差",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "波动率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "夏普比率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "索提诺比率",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "DeFi",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "NFT",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "staking",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "yield farming",
+        "weight": 4,
+        "lang": "en"
+      },
+      {
+        "text": "流动性挖矿",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "智能合约",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "区块链",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "加密货币",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "比特币",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "以太坊",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "稳定币",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "利率互换",
+        "weight": 4,
+        "lang": "zh"
+      },
+      {
+        "text": "通货膨胀",
+        "weight": 3,
+        "lang": "zh"
+      },
+      {
+        "text": "通货紧缩",
+        "weight": 4,
+        "lang": "zh"
+      }
+    ],
+    "corrections": [
+      {
+        "correct": "IPO",
+        "misheard": [
+          "爱批欧",
+          "I屁O"
+        ],
+        "note": "Initial Public Offering"
+      },
+      {
+        "correct": "PE",
+        "misheard": [
+          "批一",
+          "屁一"
+        ],
+        "note": "Private Equity"
+      },
+      {
+        "correct": "VC",
+        "misheard": [
+          "微西",
+          "维C"
+        ],
+        "note": "Venture Capital"
+      },
+      {
+        "correct": "ETF",
+        "misheard": [
+          "一踢夫",
+          "ETF基金"
+        ],
+        "note": "Exchange-Traded Fund"
+      },
+      {
+        "correct": "基金",
+        "misheard": [
+          "鸡金",
+          "集金"
+        ],
+        "note": "fund"
+      },
+      {
+        "correct": "股票",
+        "misheard": [
+          "骨票",
+          "古票"
+        ],
+        "note": "stock"
+      },
+      {
+        "correct": "债券",
+        "misheard": [
+          "寨券",
+          "在券"
+        ],
+        "note": "bond"
+      },
+      {
+        "correct": "期货",
+        "misheard": [
+          "其货",
+          "器货"
+        ],
+        "note": "futures"
+      },
+      {
+        "correct": "融资",
+        "misheard": [
+          "荣资",
+          "容资"
+        ],
+        "note": "financing"
+      },
+      {
+        "correct": "估值",
+        "misheard": [
+          "古值",
+          "顾值"
+        ],
+        "note": "valuation"
+      },
+      {
+        "correct": "市盈率",
+        "misheard": [
+          "市赢率",
+          "四盈率"
+        ],
+        "note": "P/E ratio"
+      },
+      {
+        "correct": "净资产",
+        "misheard": [
+          "近资产",
+          "净只产"
+        ],
+        "note": "net assets"
+      },
+      {
+        "correct": "现金流",
+        "misheard": [
+          "献金流",
+          "现金留"
+        ],
+        "note": "cash flow"
+      },
+      {
+        "correct": "资产负债表",
+        "misheard": [
+          "资产负载表",
+          "只产负债表"
+        ],
+        "note": "balance sheet"
+      },
+      {
+        "correct": "利润表",
+        "misheard": [
+          "利润标",
+          "利润彪"
+        ],
+        "note": "income statement"
+      },
+      {
+        "correct": "尽调",
+        "misheard": [
+          "近调",
+          "紧调"
+        ],
+        "note": "due diligence"
+      },
+      {
+        "correct": "对赌协议",
+        "misheard": [
+          "对赌谐意",
+          "堆赌协议"
+        ],
+        "note": "valuation adjustment mechanism"
+      },
+      {
+        "correct": "风控",
+        "misheard": [
+          "疯控",
+          "封控"
+        ],
+        "note": "risk control"
+      },
+      {
+        "correct": "合规",
+        "misheard": [
+          "核规",
+          "何规"
+        ],
+        "note": "compliance"
+      },
+      {
+        "correct": "清算",
+        "misheard": [
+          "轻算",
+          "青算"
+        ],
+        "note": "liquidation"
+      },
+      {
+        "correct": "杠杆",
+        "misheard": [
+          "钢杆",
+          "杠干"
+        ],
+        "note": "leverage"
+      },
+      {
+        "correct": "对冲",
+        "misheard": [
+          "堆冲",
+          "对充"
+        ],
+        "note": "hedging"
+      },
+      {
+        "correct": "通胀",
+        "misheard": [
+          "通涨",
+          "同胀"
+        ],
+        "note": "inflation"
+      },
+      {
+        "correct": "降息",
+        "misheard": [
+          "讲息",
+          "将息"
+        ],
+        "note": "rate cut"
+      },
+      {
+        "correct": "加息",
+        "misheard": [
+          "假息",
+          "甲息"
+        ],
+        "note": "rate hike"
+      }
+    ]
+  }
+]

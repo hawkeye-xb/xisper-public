@@ -1,0 +1,57 @@
+{
+  "title": "ASR Error Recovery: Auto-Retry Flow",
+  "actors": [
+    { "label": "ASR Upstream",         "color": "red"    },
+    { "label": "CF Worker Proxy",      "color": "purple" },
+    { "label": "ASRClient",            "color": "blue"   },
+    { "label": "RecordingCoordinator", "color": "orange" },
+    { "label": "RetranscribeService",  "color": "green"  }
+  ],
+  "steps": [
+    {
+      "actor": "ASR Upstream",
+      "text":  "1. Upstream closes WS\ncode=1009 / timeout / error",
+      "color": "red"
+    },
+    {
+      "actor": "CF Worker Proxy",
+      "text":  "2. Detect upstream close\nRefund consumed quota\nClose client WS\nD1 audit: refund record",
+      "from":  "ASR Upstream",
+      "arrow": "WS close event"
+    },
+    {
+      "actor": "ASRClient",
+      "text":  "3. receiveLoop gets error\nonDisconnect callback fires",
+      "from":  "CF Worker Proxy",
+      "arrow": "WS close / ENOTCONN"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "4. handleMidRecordingDisconnect\nStop AudioEngine\nGrab PCM from Queue B\nClear in-memory text\nstate = .finalizing",
+      "from":  "ASRClient",
+      "arrow": "onDisconnect"
+    },
+    {
+      "actor": "RetranscribeService",
+      "text":  "5. transcribeFromPCM()\nNew WS connection\nStream PCM in chunks\nwaitForFinal (15s timeout)",
+      "from":  "RecordingCoordinator",
+      "arrow": "PCM data + config"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "6a. Success path\ncommitResult(text)\nPersist + LLM + Inject\nUser sees no error",
+      "from":  "RetranscribeService",
+      "arrow": "final text",
+      "style": "dashed",
+      "color": "green"
+    },
+    {
+      "actor": "RecordingCoordinator",
+      "text":  "6b. Retry also failed\nsaveEmptyRecord(isServiceError)\nUser can retry from History",
+      "from":  "RetranscribeService",
+      "arrow": "error",
+      "style": "dashed",
+      "color": "red"
+    }
+  ]
+}

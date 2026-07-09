@@ -1,0 +1,69 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+.pnpm-store
+
+# Local env files (containing sensitive data)
+.env
+.env.*
+!.env.*.example
+.dev.vars
+!.dev.vars.example
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+
+# Build Outputs
+.next/
+out/
+*/build
+build/output
+dist
+*dist*
+*release*
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__
+*.pyc
+
+# Misc
+.DS_Store
+*.pem
+*.log
+
+# Certificates and keys
+*.key
+*.crt
+*.p12
+*certificate*
+
+# Xcode / Swift
+**/.build/
+*.dmg
+*.ipa
+*.xcarchive
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+apps/mac-desktop/*.xcodeproj/xcuserdata/
+apps/mac-desktop/*.xcodeproj/project.xcworkspace/xcuserdata/
+apps/mac-desktop/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Backend worker configs with real CF resource IDs — copy from .example
+apps/services/wrangler.toml
+apps/ai-worker/wrangler.toml

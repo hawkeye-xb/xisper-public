@@ -1,0 +1,41 @@
+{
+  "title": "Flow 3: App Activation Refresh",
+  "actors": [
+    { "label": "macOS App", "color": "blue" },
+    { "label": "Browser", "color": "yellow" },
+    { "label": "Backend", "color": "purple" }
+  ],
+  "steps": [
+    {
+      "actor": "macOS App",
+      "text": "1. startUpgrade()\nawaitingPaymentReturn\n= true"
+    },
+    {
+      "actor": "Browser",
+      "text": "2. User on pricing page\nor Creem checkout",
+      "from": "macOS App",
+      "arrow": "open browser"
+    },
+    {
+      "actor": "macOS App",
+      "text": "3. User switches back\ndidBecomeActive fires\nCheck: awaiting == true?",
+      "from": "Browser",
+      "arrow": "cmd+tab / click",
+      "style": "dashed"
+    },
+    {
+      "actor": "Backend",
+      "text": "4. Reconcile sub\nGET /subscription/status\nQuery Creem API",
+      "from": "macOS App",
+      "arrow": "reconcileAndRefresh()"
+    },
+    {
+      "actor": "macOS App",
+      "text": "5. Refresh usage\nUpdate tier in UI\nClear awaiting flag",
+      "from": "Backend",
+      "arrow": "tier + quota data",
+      "style": "dashed",
+      "color": "green"
+    }
+  ]
+}

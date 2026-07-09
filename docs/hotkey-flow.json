@@ -1,0 +1,113 @@
+{
+  "title": "Xisper Hotkey Recording Flow (Fixed)",
+  "actors": [
+    { "label": "User",               "color": "yellow" },
+    { "label": "KeyboardMonitor",    "color": "gray" },
+    { "label": "HotkeySystem",       "color": "blue" },
+    { "label": "Coordinator",        "color": "green" }
+  ],
+  "steps": [
+    {
+      "actor": "User",
+      "text": "Press FN (1st time)"
+    },
+    {
+      "actor": "KeyboardMonitor",
+      "text": "CGEventTap → flagsChanged\npressingKeys[FN] = true\nnotifyState → main queue",
+      "from": "User",
+      "arrow": "FN down"
+    },
+    {
+      "actor": "HotkeySystem",
+      "text": "handleStateChange({FN})\nset match → commitDown(FN)\ntriggerAction(FN)",
+      "from": "KeyboardMonitor",
+      "arrow": "MainActor"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state == .idle ?\n→ YES → handleKeyPress()\n→ startSession()",
+      "color": "green",
+      "from": "HotkeySystem",
+      "arrow": "read state"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state = .recording\nASR connect + Audio start\nMic active, streaming PCM"
+    },
+    {
+      "actor": "User",
+      "text": "Release FN",
+      "from": "Coordinator",
+      "arrow": "",
+      "style": "dashed"
+    },
+    {
+      "actor": "HotkeySystem",
+      "text": "handleStateChange({})\ncommitUp → activeShortcut=nil\n(no action dispatched)",
+      "from": "User",
+      "arrow": "FN up"
+    },
+    {
+      "actor": "User",
+      "text": "Press FN (2nd time)"
+    },
+    {
+      "actor": "HotkeySystem",
+      "text": "triggerAction(FN)\nread coordinator.state",
+      "from": "User",
+      "arrow": "FN down"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state == .recording ?\n→ YES → handleKeyRelease()\n→ stopSession()",
+      "color": "red",
+      "from": "HotkeySystem",
+      "arrow": "read state"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state = .finalizing\nstop audio, sendFinish\nwait ASR result (8s max)"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state = .committing\nLLM postprocess (8s max)\ninject text → clipboard"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "state = .idle\nSession complete",
+      "color": "green"
+    },
+    {
+      "actor": "User",
+      "text": "Press FN during\nfinalizing/committing"
+    },
+    {
+      "actor": "HotkeySystem",
+      "text": "triggerAction(FN)\nstate == .finalizing\n→ break (IGNORE)",
+      "color": "orange",
+      "from": "User",
+      "arrow": "FN down"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "ASR disconnect mid-rec\nonDisconnect fires\nautoRetry → .finalizing",
+      "color": "red"
+    },
+    {
+      "actor": "User",
+      "text": "Press FN during retry"
+    },
+    {
+      "actor": "HotkeySystem",
+      "text": "triggerAction(FN)\nstate == .finalizing\n→ break (IGNORE)",
+      "color": "orange",
+      "from": "User",
+      "arrow": "FN down"
+    },
+    {
+      "actor": "Coordinator",
+      "text": "Retry complete\nstate = .idle\nReady for next FN",
+      "color": "green"
+    }
+  ]
+}

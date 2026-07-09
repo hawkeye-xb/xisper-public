@@ -1,0 +1,33 @@
+{
+  "name": "@xisper/admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "pnpm --filter @xisper/icons build:icons",
+    "build": "vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --build",
+    "deploy": "vite build && wrangler pages deploy dist",
+    "build:beta": "vite build --mode beta",
+    "build:prod": "vite build --mode production",
+    "deploy:beta": "pnpm run build:beta && wrangler pages deploy dist --project-name xisper-admin-beta",
+    "deploy:prod": "pnpm run build:prod && wrangler pages deploy dist --project-name xisper-admin"
+  },
+  "dependencies": {
+    "@xisper/icons": "workspace:*",
+    "element-plus": "^2.10.4",
+    "@element-plus/icons-vue": "^2.3.2",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vitejs/plugin-vue-jsx": "^5.1.1",
+    "@vue/tsconfig": "^0.8.1",
+    "typescript": "~5.9.0",
+    "vite": "^7.1.11",
+    "vue-tsc": "^3.1.1"
+  }
+}

@@ -1,0 +1,97 @@
+name = "xisper-ai-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─────────────────────────────────────────────────────────────
+# Copy this file to `wrangler.toml` and fill in your own
+# Cloudflare resource IDs. `wrangler.toml` is gitignored so real
+# IDs never get committed.
+# ─────────────────────────────────────────────────────────────
+
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+# KV: shared with xisper-services for prompt templates
+[[kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+# D1: shared with xisper-services for quota tracking
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"
+database_id = "<D1_DATABASE_ID_DEV>"
+
+# Agent Durable Object
+[durable_objects]
+bindings = [{ name = "AI_AGENT", class_name = "AIAgent" }]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AIAgent"]
+
+# ============================================
+# Development environment
+# ============================================
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+[env.development.ai]
+binding = "AI"
+
+[[env.development.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+preview_id = "<AI_KV_PREVIEW_ID>"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"
+database_id = "<D1_DATABASE_ID_DEV>"
+
+# ============================================
+# Beta environment
+# ============================================
+[env.beta]
+vars = { ENVIRONMENT = "beta" }
+
+[env.beta.ai]
+binding = "AI"
+
+[[env.beta.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+
+[[env.beta.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-dev"
+database_id = "<D1_DATABASE_ID_DEV>"
+
+[env.beta.durable_objects]
+bindings = [{ name = "AI_AGENT", class_name = "AIAgent" }]
+
+# ============================================
+# Production environment
+# ============================================
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.production.ai]
+binding = "AI"
+
+[env.production.durable_objects]
+bindings = [{ name = "AI_AGENT", class_name = "AIAgent" }]
+
+[[env.production.kv_namespaces]]
+binding = "AI_KV"
+id = "<AI_KV_NAMESPACE_ID>"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "ai-services-db-prod"
+database_id = "<D1_DATABASE_ID_PROD>"

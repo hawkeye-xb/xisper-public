@@ -1,0 +1,7 @@
+{
+  "name": "@xisper/keyboard-monitor",
+  "version": "0.1.0",
+  "description": "macOS keyboard event monitor (CGEventTap via Swift dylib)",
+  "private": true,
+  "os": ["darwin"]
+}

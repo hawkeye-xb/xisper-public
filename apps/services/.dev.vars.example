@@ -1,0 +1,112 @@
+# Local Development Environment Variables
+# 用于本地开发时的环境变量
+# 复制此文件为 .dev.vars 并填入真实的值
+
+# ============================================
+# Logto 认证配置
+# ============================================
+# Logto 端点（从 Logto 控制台获取）
+LOGTO_ENDPOINT=https://fn2daz.logto.app
+
+# Logto 应用 ID（本地开发通常用 beta/xisper-dev）
+LOGTO_APP_ID=2mepw39zb3jt55dnht427
+
+# Logto App Secret（SPA 模式通常不需要，后端验证 token 不需要）
+# 如果使用 Machine-to-Machine 或后端直接调用，才需要填写
+LOGTO_APP_SECRET=
+
+# ============================================
+# AI API 密钥
+# ============================================
+# OpenAI API Key
+OPENAI_API_KEY=sk-your-openai-api-key
+
+# DeepSeek API Key（可选）
+DEEPSEEK_API_KEY=your-deepseek-api-key
+
+# ============================================
+# Creem 支付平台 (https://creem.io)
+# ============================================
+# Creem API Key（从 Dashboard → Settings → API Keys 获取）
+# Test mode: creem_test_xxx, Live mode: creem_xxx
+CREEM_API_KEY=creem_test_your-api-key
+
+# Creem Webhook 密钥（从 Dashboard → Settings → Webhooks 获取）
+PAYMENT_WEBHOOK_SECRET=your-webhook-secret
+
+# ============================================
+# Polar 支付平台 (https://polar.sh)
+# ============================================
+# 支付提供商选择：'creem' 或 'polar' 或 'paddle'
+# 默认使用 Creem，切换时设置为对应的 provider 名称
+PAYMENT_PROVIDER=creem
+
+# Polar API Token（从 Dashboard → Settings → API 获取）
+POLAR_ACCESS_TOKEN=your-polar-access-token
+
+# Polar Webhook 密钥（从 Dashboard → Webhooks 获取）
+POLAR_WEBHOOK_SECRET=your-polar-webhook-secret
+
+# Polar 服务器环境：'sandbox' 或 'production'
+POLAR_SERVER=sandbox
+
+# ============================================
+# Paddle 支付平台 (https://paddle.com)
+# ============================================
+# Paddle API Key（从 Developer Tools → Authentication 获取）
+PADDLE_ACCESS_TOKEN=your-paddle-api-key
+
+# Paddle Vendor ID（通过 KYC 后获取）
+PADDLE_VENDOR_ID=your-vendor-id
+
+# Paddle Webhook 密钥（从 Developer Tools → Webhooks 获取）
+PADDLE_WEBHOOK_SECRET=your-paddle-webhook-secret
+
+# Paddle 服务器环境：'sandbox' 或 'production'
+PADDLE_SERVER=sandbox
+
+# ============================================
+# 阿里云 ASR 配置（当前 ASR 代理使用）
+# ============================================
+# 阿里云 DashScope API Key（从 https://dashscope.console.aliyun.com 获取）
+ALIBABA_API_KEY=your-alibaba-dashscope-api-key
+
+# ============================================
+# 豆包 ASR 配置（已弃用）
+# ============================================
+# 豆包语音识别 App ID（从火山引擎控制台获取）
+DOUBAO_APP_ID=your-doubao-app-id
+
+# 豆包语音识别 Access Token
+DOUBAO_ACCESS_TOKEN=your-doubao-access-token
+
+# 豆包 Resource ID（可选，默认值）
+DOUBAO_RESOURCE_ID=volc.bigasr.sauc.duration
+
+# 豆包集群配置（可选）
+DOUBAO_CLUSTER=
+
+# ============================================
+# App Update / R2 配置
+# ============================================
+# R2 端点（Cloudflare Account ID）
+# 格式: https://<account-id>.r2.cloudflarestorage.com
+R2_ENDPOINT=https://your-account-id.r2.cloudflarestorage.com
+
+# R2 访问密钥（从 Cloudflare Dashboard → R2 → API Tokens 获取）
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+
+# R2 Bucket 名称（用于存储应用更新文件）
+R2_BUCKET_NAME=xisper-releases
+
+# R2 公开访问 URL（r2.dev 公开地址或自定义域名）
+R2_PUBLIC_URL=https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev
+
+# ============================================
+# 注意事项
+# ============================================
+# 1. .dev.vars 文件已被 .gitignore 忽略，不会提交到仓库
+# 2. 生产环境密钥使用 `wrangler secret put` 命令设置
+# 3. 切勿将真实密钥提交到代码仓库
+# 4. SPA 模式下，前端使用 LOGTO_APP_ID，后端只需要 LOGTO_ENDPOINT

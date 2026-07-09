@@ -1,0 +1,65 @@
+{
+  "title": "ASR Adapter Architecture (Dependency Inversion)",
+  "sections": [
+    {
+      "label": "Mac Client (Provider-Agnostic)",
+      "color": "yellow",
+      "items": [
+        { "label": "AudioEngine", "color": "yellow", "desc": "16kHz PCM, ~3.2KB/100ms" },
+        { "label": "Queue A (audioQueue)", "color": "orange", "desc": "FIFO, real-time send" },
+        { "label": "Queue B (pcmChunks)", "color": "orange", "desc": "Full audio, WAV + retry" },
+        { "label": "ASRClient", "color": "yellow", "desc": "Binary WS, recordingId" }
+      ]
+    },
+    {
+      "label": "CF Worker Proxy (Unified Logic)",
+      "color": "blue",
+      "items": [
+        { "label": "messageBuffer", "color": "blue", "desc": "Max 500 frames buffer" },
+        { "label": "adapter.sendAudio()", "color": "blue", "desc": "Dispatch to adapter" },
+        { "label": "Result Normalizer", "color": "blue", "desc": "NormalizedASREvent" },
+        { "label": "Quota Manager", "color": "blue", "desc": "Incremental + refund" }
+      ]
+    },
+    {
+      "label": "ASR Adapter Interface (Dependency Inversion)",
+      "color": "purple",
+      "items": [
+        { "label": "sendAudio(ws, pcm)", "color": "purple", "desc": "Encode + send + split" },
+        { "label": "sendInit(ws, config)", "color": "purple", "desc": "Provider init protocol" },
+        { "label": "sendFinish(ws)", "color": "purple", "desc": "End-of-audio signal" },
+        { "label": "parseResponse(data)", "color": "purple", "desc": "Normalize to event" }
+      ]
+    },
+    {
+      "label": "Concrete Adapters",
+      "color": "green",
+      "items": [
+        { "label": "Fun-ASR (Alibaba)", "color": "green", "desc": "Raw binary, no limit" },
+        { "label": "Qwen3 (Dashscope)", "color": "red", "desc": "Base64 JSON, 256KB split" },
+        { "label": "Doubao (Volcengine)", "color": "purple", "desc": "Binary frame protocol" }
+      ]
+    },
+    {
+      "label": "Upstream ASR Services",
+      "color": "gray",
+      "items": [
+        { "label": "DashScope Fun-ASR", "color": "gray", "desc": "Heartbeat, duplex" },
+        { "label": "DashScope Realtime", "color": "gray", "desc": "OpenAI-compat, VAD" },
+        { "label": "Volcengine BigASR", "color": "gray", "desc": "Custom binary proto" }
+      ]
+    }
+  ],
+  "connections": [
+    { "from": "AudioEngine", "to": "Queue A (audioQueue)", "label": "onAudioData" },
+    { "from": "AudioEngine", "to": "Queue B (pcmChunks)", "label": "parallel buffer", "style": "dashed" },
+    { "from": "Queue A (audioQueue)", "to": "ASRClient", "label": "audioDrainTask" },
+    { "from": "ASRClient", "to": "messageBuffer", "label": "binary PCM WS" },
+    { "from": "messageBuffer", "to": "adapter.sendAudio()", "label": "flush / forward" },
+    { "from": "adapter.sendAudio()", "to": "sendAudio(ws, pcm)", "label": "interface call" },
+    { "from": "Fun-ASR (Alibaba)", "to": "DashScope Fun-ASR" },
+    { "from": "Qwen3 (Dashscope)", "to": "DashScope Realtime" },
+    { "from": "Doubao (Volcengine)", "to": "Volcengine BigASR" },
+    { "from": "Result Normalizer", "to": "ASRClient", "label": "JSON events", "style": "dashed" }
+  ]
+}

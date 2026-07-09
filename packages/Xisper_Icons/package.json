@@ -1,0 +1,21 @@
+{
+  "name": "@xisper/icons",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:all": "node scripts/generate-all.js",
+    "generate:tray": "node scripts/generate-tray.js",
+    "build:icons": "node scripts/generate-all.js && node scripts/copy-icons.js"
+  },
+  "devDependencies": {
+    "png2icons": "^2.0.1",
+    "sharp": "^0.33.5"
+  },
+  "turbo": {
+    "build:icons": {
+      "inputs": ["iconset/**", "tray/**", "svg/**", "Xisper.icns"],
+      "outputs": [],
+      "cache": false
+    }
+  }
+}

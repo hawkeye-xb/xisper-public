@@ -1,0 +1,8 @@
+# Cloudflare Pages redirects for SPA routing
+# See: https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Serve static assets directly
+/assets/*  /assets/:splat  200
+
+# SPA fallback - redirect all other routes to index.html
+/*  /index.html  200

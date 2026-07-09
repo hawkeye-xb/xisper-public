@@ -1,0 +1,5 @@
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Xisperは音声をテキストに変換するため、マイクへのアクセスが必要です。";
+
+/* Accessibility permission prompt */
+"NSAccessibilityUsageDescription" = "Xisperはグローバルキーボードショートカットの監視と文字入力の自動挿入のため、アクセシビリティ権限が必要です。";

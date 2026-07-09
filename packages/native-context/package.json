@@ -1,0 +1,14 @@
+{
+  "name": "@xisper/native-context",
+  "version": "0.1.0",
+  "description": "macOS native context collection via Swift dylib + koffi FFI",
+  "private": true,
+  "scripts": {
+    "build": "bash build.sh"
+  },
+  "os": ["darwin"],
+  "files": [
+    "libXisperContext.dylib",
+    "package.json"
+  ]
+}

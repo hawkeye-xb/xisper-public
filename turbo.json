@@ -1,0 +1,92 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build:icons": {
+      "dependsOn": [],
+      "inputs": ["src/**/*.svg"],
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    "build:desktop": {
+      "dependsOn": ["^build:icons"],
+      "inputs": ["src/**", "../web/src/**"],
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    "build:web": {
+      "dependsOn": ["^build:icons"],
+      "inputs": ["src/**"],
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev:desktop": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev:services": {
+      "cache": false,
+      "persistent": true
+    },
+    "deploy:services": {
+      "cache": false
+    },
+    "deploy:services:staging": {
+      "cache": false
+    },
+    "deploy:services:prod": {
+      "cache": false
+    },
+    "dist:desktop": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "dist:desktop:mac": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "dist:desktop:win": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "dist:desktop:linux": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pkg:desktop:mac": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pkg:desktop:mac:signed": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pkg:desktop:mac:beta": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pkg:desktop:mac:prod": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pub:desktop:mac:beta": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    },
+    "pub:desktop:mac:prod": {
+      "dependsOn": ["build:desktop"],
+      "cache": false
+    }
+  }
+}

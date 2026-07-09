@@ -1,0 +1,128 @@
+{
+  "title": "RecordingCoordinator State Machine",
+  "actors": [
+    { "label": "State",        "color": "blue" },
+    { "label": "Trigger",      "color": "orange" },
+    { "label": "Mic / Audio",  "color": "green" },
+    { "label": "ASR / Net",    "color": "purple" }
+  ],
+  "steps": [
+    {
+      "actor": "State",
+      "text": "IDLE\n(ready)",
+      "color": "green"
+    },
+    {
+      "actor": "Trigger",
+      "text": "FN press\nhandleKeyPress()\nstartSession()",
+      "from": "State",
+      "arrow": "user action"
+    },
+    {
+      "actor": "Mic / Audio",
+      "text": "AudioEngine.start()\nMic ON, streaming PCM\nonAudioLevel callback",
+      "color": "green",
+      "from": "Trigger",
+      "arrow": "success"
+    },
+    {
+      "actor": "ASR / Net",
+      "text": "WebSocket connect\nsendStart(config)\naudioDrain → sendAudio",
+      "from": "Mic / Audio",
+      "arrow": "PCM data"
+    },
+    {
+      "actor": "State",
+      "text": "RECORDING\nmic=ON, asr=connected",
+      "color": "yellow"
+    },
+    {
+      "actor": "Trigger",
+      "text": "Error: auth / quota /\naudio engine fail",
+      "color": "red",
+      "from": "State",
+      "arrow": "",
+      "style": "dashed"
+    },
+    {
+      "actor": "State",
+      "text": "→ IDLE (reset)\nmic never started\nor stopped immediately",
+      "color": "green",
+      "from": "Trigger",
+      "arrow": "error path"
+    },
+    {
+      "actor": "Trigger",
+      "text": "FN press (2nd)\nhandleKeyRelease()\nstopSession()",
+      "from": "State",
+      "arrow": ""
+    },
+    {
+      "actor": "Mic / Audio",
+      "text": "50ms trailing capture\nAudioEngine.stop()\nMic OFF",
+      "color": "red",
+      "from": "Trigger",
+      "arrow": "stop audio"
+    },
+    {
+      "actor": "State",
+      "text": "FINALIZING\nmic=OFF, waiting ASR\n(max 8s timeout)",
+      "color": "purple"
+    },
+    {
+      "actor": "Trigger",
+      "text": "Mistouch <200ms\nor silence detected",
+      "color": "red"
+    },
+    {
+      "actor": "State",
+      "text": "→ IDLE (discard)\nno ASR wait needed",
+      "color": "green",
+      "from": "Trigger",
+      "arrow": "short recording"
+    },
+    {
+      "actor": "ASR / Net",
+      "text": "sendFinish()\nwaitForFinal(8s)\nreceive final text",
+      "from": "State",
+      "arrow": "wait result"
+    },
+    {
+      "actor": "State",
+      "text": "COMMITTING\nmic=OFF, asr=done\nLLM postprocess (8s max)",
+      "color": "purple",
+      "from": "ASR / Net",
+      "arrow": "got text"
+    },
+    {
+      "actor": "Trigger",
+      "text": "LLM done → InputWriter\ninject text via Cmd+V\nsave to SwiftData",
+      "from": "State",
+      "arrow": ""
+    },
+    {
+      "actor": "State",
+      "text": "IDLE\n(session complete)",
+      "color": "green",
+      "from": "Trigger",
+      "arrow": "done"
+    },
+    {
+      "actor": "ASR / Net",
+      "text": "ASR disconnect\nmid-recording!\nonDisconnect fires",
+      "color": "red"
+    },
+    {
+      "actor": "State",
+      "text": "RECORDING → FINALIZING\nautoRetry: retranscribe\nfrom buffered PCM",
+      "color": "orange",
+      "from": "ASR / Net",
+      "arrow": "disconnect"
+    },
+    {
+      "actor": "State",
+      "text": "→ IDLE\nretry done or failed",
+      "color": "green"
+    }
+  ]
+}

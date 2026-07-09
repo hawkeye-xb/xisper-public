@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Language Preview — Design Language Preview</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Inter", "Inter", "Helvetica Neue", Arial, sans-serif;
+    background: #fbfbfb;
+    color: #1e1f20;
+    line-height: 1.6;
+    padding: 40px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 32px; font-weight: 700; margin-bottom: 8px;
+    background: linear-gradient(135deg, #008f9f, #1e1f20);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle { font-size: 14px; color: #363839; margin-bottom: 48px; opacity: 0.7; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #fbfbfbee; backdrop-filter: blur(12px);
+    padding: 12px 0; margin-bottom: 32px;
+    border-bottom: 1px solid #b8bbbb;
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  nav a {
+    font-size: 13px; color: #363839; text-decoration: none;
+    padding: 4px 12px; border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+  nav a:hover { background: #f5f5f5; color: #008f9f; }
+
+  .preview-section {
+    margin-bottom: 64px; padding-bottom: 48px;
+    border-bottom: 1px solid #b8bbbb;
+  }
+  .preview-section:last-child { border-bottom: none; }
+
+  h2 {
+    font-size: 24px; font-weight: 600; margin-bottom: 8px; color: #1e1f20;
+  }
+  h3 {
+    font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #363839;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .section-desc {
+    font-size: 14px; color: #363839; opacity: 0.7; margin-bottom: 24px;
+  }
+
+  /* Color palette */
+  .scale-row { margin-bottom: 20px; }
+  .scale-name { margin-bottom: 8px; }
+  .scale-swatches { display: flex; gap: 2px; }
+  .swatch {
+    flex: 1; min-width: 60px; height: 72px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 11px; border-radius: 4px; gap: 4px;
+    transition: transform 0.2s ease;
+  }
+  .swatch:hover { transform: scale(1.08); z-index: 1; }
+  .swatch .step { font-weight: 600; }
+  .swatch .hex { opacity: 0.8; font-family: monospace; font-size: 10px; }
+
+  .contrast-section { margin-top: 32px; }
+  .contrast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .contrast-example {
+    padding: 16px 20px; border-radius: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px;
+  }
+  .ratio { font-weight: 600; font-family: monospace; }
+
+  /* Typography */
+  .type-samples { display: flex; flex-direction: column; gap: 16px; }
+  .type-sample {
+    display: grid; grid-template-columns: 80px 100px 1fr; gap: 12px;
+    align-items: baseline; padding: 8px 0;
+    border-bottom: 1px solid #b8bbbb22;
+  }
+  .type-label { font-size: 12px; font-weight: 600; color: #008f9f; font-family: monospace; }
+  .type-value { font-size: 11px; color: #363839; opacity: 0.6; font-family: monospace; }
+  .type-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weight-row { margin-top: 32px; }
+  .weights { font-size: 18px; display: flex; flex-wrap: wrap; gap: 16px; }
+
+  /* Spacing */
+  .spacing-scale { display: flex; flex-direction: column; gap: 8px; }
+  .spacing-item {
+    display: grid; grid-template-columns: 48px 1fr 60px; gap: 12px; align-items: center;
+  }
+  .spacing-label { font-size: 12px; font-weight: 600; font-family: monospace; color: #008f9f; }
+  .spacing-bar {
+    background: linear-gradient(90deg, #008f9f44, #008f9f22);
+    border-radius: 4px; min-height: 24px;
+    transition: all 0.3s ease;
+  }
+  .spacing-bar:hover { background: linear-gradient(90deg, #008f9f88, #008f9f44); }
+  .spacing-value { font-size: 12px; color: #363839; font-family: monospace; }
+
+  /* Radius */
+  .radius-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+  .radius-demo { text-align: center; }
+  .radius-box {
+    width: 72px; height: 72px; background: #008f9f33;
+    border: 2px solid #008f9f66; margin-bottom: 8px;
+    transition: all 0.2s ease;
+  }
+  .radius-box:hover { background: #008f9f55; }
+  .radius-label { font-size: 12px; font-weight: 600; display: block; }
+  .radius-value { font-size: 11px; color: #363839; opacity: 0.6; font-family: monospace; }
+
+  /* Motion */
+  .motion-demos { display: flex; flex-direction: column; gap: 16px; }
+  .motion-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px; background: #f5f5f5; border-radius: 8px;
+    cursor: pointer;
+  }
+  .motion-ball {
+    width: 32px; height: 32px; border-radius: 50%; background: #008f9f;
+    transition-property: transform;
+    flex-shrink: 0;
+  }
+  .motion-item:hover .motion-ball { transform: translateX(120px); }
+  .motion-item .motion-ball {
+    transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  }
+  .motion-label { font-size: 13px; font-family: monospace; color: #363839; }
+
+  /* Mock UI */
+  .mock-container { margin-top: 16px; }
+  .mock-btn-primary:hover { opacity: 0.9; }
+  .mock-btn-secondary:hover { background: #008f9f11 !important; }
+
+  /* Footer */
+  footer {
+    margin-top: 64px; padding-top: 24px;
+    border-top: 1px solid #b8bbbb;
+    font-size: 12px; color: #363839; opacity: 0.5; text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .scale-swatches { flex-wrap: wrap; }
+    .swatch { min-width: 40px; height: 56px; }
+    .type-sample { grid-template-columns: 1fr; }
+    .contrast-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <h1>Design Language Preview</h1>
+  <p class="subtitle">Auto-generated Design Language System Preview</p>
+
+  <nav>
+    <a href="#colors">Colors</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing</a>
+    <a href="#radius">Radius</a>
+    <a href="#motion">Motion</a>
+    <a href="#mockui">Mock UI</a>
+  </nav>
+
+  
+    <section class="preview-section" id="colors">
+        <h2>Color Palette</h2>
+        <p class="section-desc">12-step perceptual color scales generated in OKLCH color space.</p>
+        
+        <div class="scale-row">
+            <h3 class="scale-name">Primary</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#f8fcfd; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#f8fcfd</span>
+            </div>
+            <div class="swatch" style="background:#f0f6f7; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#f0f6f7</span>
+            </div>
+            <div class="swatch" style="background:#e0ecee; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#e0ecee</span>
+            </div>
+            <div class="swatch" style="background:#cee2e6; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#cee2e6</span>
+            </div>
+            <div class="swatch" style="background:#b5d9de; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#b5d9de</span>
+            </div>
+            <div class="swatch" style="background:#8cc6cf; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#8cc6cf</span>
+            </div>
+            <div class="swatch" style="background:#5aadb9; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#5aadb9</span>
+            </div>
+            <div class="swatch" style="background:#008f9f; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#008f9f</span>
+            </div>
+            <div class="swatch" style="background:#007c8b; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#007c8b</span>
+            </div>
+            <div class="swatch" style="background:#005f6c; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#005f6c</span>
+            </div>
+            <div class="swatch" style="background:#00414a; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#00414a</span>
+            </div>
+            <div class="swatch" style="background:#00252a; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#00252a</span>
+            </div></div>
+        </div>
+        <div class="scale-row">
+            <h3 class="scale-name">Neutral</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#fbfbfb; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#fbfbfb</span>
+            </div>
+            <div class="swatch" style="background:#f5f5f5; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#f5f5f5</span>
+            </div>
+            <div class="swatch" style="background:#e9e9ea; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#e9e9ea</span>
+            </div>
+            <div class="swatch" style="background:#dddede; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#dddede</span>
+            </div>
+            <div class="swatch" style="background:#d0d1d1; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#d0d1d1</span>
+            </div>
+            <div class="swatch" style="background:#b8bbbb; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#b8bbbb</span>
+            </div>
+            <div class="swatch" style="background:#9c9fa0; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#9c9fa0</span>
+            </div>
+            <div class="swatch" style="background:#7a7e7f; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#7a7e7f</span>
+            </div>
+            <div class="swatch" style="background:#696d6d; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#696d6d</span>
+            </div>
+            <div class="swatch" style="background:#505354; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#505354</span>
+            </div>
+            <div class="swatch" style="background:#363839; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#363839</span>
+            </div>
+            <div class="swatch" style="background:#1e1f20; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#1e1f20</span>
+            </div></div>
+        </div>
+        <div class="scale-row">
+            <h3 class="scale-name">Success</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#f9fcf9; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#f9fcf9</span>
+            </div>
+            <div class="swatch" style="background:#f2f7f2; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#f2f7f2</span>
+            </div>
+            <div class="swatch" style="background:#e3ede3; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#e3ede3</span>
+            </div>
+            <div class="swatch" style="background:#d3e3d3; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#d3e3d3</span>
+            </div>
+            <div class="swatch" style="background:#bedabe; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#bedabe</span>
+            </div>
+            <div class="swatch" style="background:#9cc89c; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#9cc89c</span>
+            </div>
+            <div class="swatch" style="background:#74b075; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#74b075</span>
+            </div>
+            <div class="swatch" style="background:#3e9245; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#3e9245</span>
+            </div>
+            <div class="swatch" style="background:#2f7f36; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#2f7f36</span>
+            </div>
+            <div class="swatch" style="background:#216227; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#216227</span>
+            </div>
+            <div class="swatch" style="background:#16431a; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#16431a</span>
+            </div>
+            <div class="swatch" style="background:#0b260d; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#0b260d</span>
+            </div></div>
+        </div>
+        <div class="scale-row">
+            <h3 class="scale-name">Warning</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#fefaf7; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#fefaf7</span>
+            </div>
+            <div class="swatch" style="background:#faf4ef; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#faf4ef</span>
+            </div>
+            <div class="swatch" style="background:#f4e7de; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#f4e7de</span>
+            </div>
+            <div class="swatch" style="background:#efd9cc; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#efd9cc</span>
+            </div>
+            <div class="swatch" style="background:#edc9b1; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#edc9b1</span>
+            </div>
+            <div class="swatch" style="background:#e5ad88; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#e5ad88</span>
+            </div>
+            <div class="swatch" style="background:#d48b57; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#d48b57</span>
+            </div>
+            <div class="swatch" style="background:#be6000; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#be6000</span>
+            </div>
+            <div class="swatch" style="background:#a85000; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#a85000</span>
+            </div>
+            <div class="swatch" style="background:#833c00; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#833c00</span>
+            </div>
+            <div class="swatch" style="background:#5a2800; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#5a2800</span>
+            </div>
+            <div class="swatch" style="background:#341600; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#341600</span>
+            </div></div>
+        </div>
+        <div class="scale-row">
+            <h3 class="scale-name">Danger</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#fffaf9; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#fffaf9</span>
+            </div>
+            <div class="swatch" style="background:#fcf3f2; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#fcf3f2</span>
+            </div>
+            <div class="swatch" style="background:#f6e5e3; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#f6e5e3</span>
+            </div>
+            <div class="swatch" style="background:#f3d6d3; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#f3d6d3</span>
+            </div>
+            <div class="swatch" style="background:#f4c4bf; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#f4c4bf</span>
+            </div>
+            <div class="swatch" style="background:#eea59e; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#eea59e</span>
+            </div>
+            <div class="swatch" style="background:#df7f78; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#df7f78</span>
+            </div>
+            <div class="swatch" style="background:#cb4e4a; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#cb4e4a</span>
+            </div>
+            <div class="swatch" style="background:#b33f3c; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#b33f3c</span>
+            </div>
+            <div class="swatch" style="background:#8c2e2c; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#8c2e2c</span>
+            </div>
+            <div class="swatch" style="background:#601f1d; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#601f1d</span>
+            </div>
+            <div class="swatch" style="background:#38100f; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#38100f</span>
+            </div></div>
+        </div>
+        <div class="scale-row">
+            <h3 class="scale-name">Info</h3>
+            <div class="scale-swatches">
+            <div class="swatch" style="background:#f8fcfd; color:#000000;">
+                <span class="step">1</span>
+                <span class="hex">#f8fcfd</span>
+            </div>
+            <div class="swatch" style="background:#f0f6f8; color:#000000;">
+                <span class="step">2</span>
+                <span class="hex">#f0f6f8</span>
+            </div>
+            <div class="swatch" style="background:#dfecf0; color:#000000;">
+                <span class="step">3</span>
+                <span class="hex">#dfecf0</span>
+            </div>
+            <div class="swatch" style="background:#cde2e8; color:#000000;">
+                <span class="step">4</span>
+                <span class="hex">#cde2e8</span>
+            </div>
+            <div class="swatch" style="background:#b3d9e2; color:#000000;">
+                <span class="step">5</span>
+                <span class="hex">#b3d9e2</span>
+            </div>
+            <div class="swatch" style="background:#89c6d5; color:#000000;">
+                <span class="step">6</span>
+                <span class="hex">#89c6d5</span>
+            </div>
+            <div class="swatch" style="background:#54adc1; color:#ffffff;">
+                <span class="step">7</span>
+                <span class="hex">#54adc1</span>
+            </div>
+            <div class="swatch" style="background:#008ea9; color:#ffffff;">
+                <span class="step">8</span>
+                <span class="hex">#008ea9</span>
+            </div>
+            <div class="swatch" style="background:#007b95; color:#ffffff;">
+                <span class="step">9</span>
+                <span class="hex">#007b95</span>
+            </div>
+            <div class="swatch" style="background:#005f73; color:#ffffff;">
+                <span class="step">10</span>
+                <span class="hex">#005f73</span>
+            </div>
+            <div class="swatch" style="background:#00414f; color:#ffffff;">
+                <span class="step">11</span>
+                <span class="hex">#00414f</span>
+            </div>
+            <div class="swatch" style="background:#00252d; color:#ffffff;">
+                <span class="step">12</span>
+                <span class="hex">#00252d</span>
+            </div></div>
+        </div>
+        
+    <div class="contrast-section">
+        <h3>Contrast Examples</h3>
+        <div class="contrast-grid">
+            <div class="contrast-example" style="background:#fbfbfb; color:#1e1f20;">
+                <span>Body text on background</span>
+                <span class="ratio">16.0:1</span>
+            </div>
+            <div class="contrast-example" style="background:#f5f5f5; color:#363839;">
+                <span>Secondary text on subtle bg</span>
+                <span class="ratio">10.8:1</span>
+            </div>
+            <div class="contrast-example" style="background:#008f9f; color:#f8fcfd;">
+                <span>White text on primary button</span>
+                <span class="ratio">3.7:1</span>
+            </div>
+            <div class="contrast-example" style="background:#fbfbfb; color:#007c8b;">
+                <span>Primary text link</span>
+                <span class="ratio">4.8:1</span>
+            </div>
+        </div>
+    </div>
+    </section>
+  
+    <section class="preview-section" id="typography">
+        <h2>Typography</h2>
+        <p class="section-desc">Modular scale: major_third (1.25x) &middot; Font: sans</p>
+        <div class="type-samples">
+        <div class="type-sample" style="font-size:61.0px; line-height:1.1; letter-spacing:-0.03em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">display</span>
+            <span class="type-value">61.0px / 1.1</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:49.0px; line-height:1.2; letter-spacing:-0.025em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">4xl</span>
+            <span class="type-value">49.0px / 1.2</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:39.0px; line-height:1.25; letter-spacing:-0.02em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">3xl</span>
+            <span class="type-value">39.0px / 1.25</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:31.0px; line-height:1.3; letter-spacing:-0.015em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">2xl</span>
+            <span class="type-value">31.0px / 1.3</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:25.0px; line-height:1.35; letter-spacing:-0.01em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">xl</span>
+            <span class="type-value">25.0px / 1.35</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:20.0px; line-height:1.45; letter-spacing:-0.005em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">lg</span>
+            <span class="type-value">20.0px / 1.45</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:16.0px; line-height:1.5; letter-spacing:0.0em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">base</span>
+            <span class="type-value">16.0px / 1.5</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:13.0px; line-height:1.55; letter-spacing:0.01em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">sm</span>
+            <span class="type-value">13.0px / 1.55</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div>
+        <div class="type-sample" style="font-size:10.0px; line-height:1.6; letter-spacing:0.02em; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <span class="type-label">xs</span>
+            <span class="type-value">10.0px / 1.6</span>
+            <span class="type-text">The quick brown fox jumps over the lazy dog</span>
+        </div></div>
+        <div class="weight-row">
+            <h3>Font Weights</h3>
+            <div class="weights"><span style="font-weight:400; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">regular (400)</span>  &middot;  <span style="font-weight:500; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">medium (500)</span>  &middot;  <span style="font-weight:600; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">semibold (600)</span>  &middot;  <span style="font-weight:700; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">bold (700)</span></div>
+        </div>
+    </section>
+  
+    <section class="preview-section" id="spacing">
+        <h2>Spacing</h2>
+        <p class="section-desc">4px grid system &middot; Density: generous</p>
+        <div class="spacing-scale">
+        <div class="spacing-item">
+            <span class="spacing-label">4xs</span>
+            <div class="spacing-bar" style="width:4px; height:24px;"></div>
+            <span class="spacing-value">4px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">3xs</span>
+            <div class="spacing-bar" style="width:8px; height:24px;"></div>
+            <span class="spacing-value">8px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">2xs</span>
+            <div class="spacing-bar" style="width:16px; height:24px;"></div>
+            <span class="spacing-value">16px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">xs</span>
+            <div class="spacing-bar" style="width:20px; height:24px;"></div>
+            <span class="spacing-value">20px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">sm</span>
+            <div class="spacing-bar" style="width:24px; height:24px;"></div>
+            <span class="spacing-value">24px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">md</span>
+            <div class="spacing-bar" style="width:32px; height:24px;"></div>
+            <span class="spacing-value">32px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">lg</span>
+            <div class="spacing-bar" style="width:40px; height:24px;"></div>
+            <span class="spacing-value">40px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">xl</span>
+            <div class="spacing-bar" style="width:48px; height:24px;"></div>
+            <span class="spacing-value">48px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">2xl</span>
+            <div class="spacing-bar" style="width:64px; height:24px;"></div>
+            <span class="spacing-value">64px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">3xl</span>
+            <div class="spacing-bar" style="width:80px; height:24px;"></div>
+            <span class="spacing-value">80px</span>
+        </div>
+        <div class="spacing-item">
+            <span class="spacing-label">4xl</span>
+            <div class="spacing-bar" style="width:96px; height:24px;"></div>
+            <span class="spacing-value">96px</span>
+        </div></div>
+    </section>
+  
+    <section class="preview-section" id="radius">
+        <h2>Border Radius</h2>
+        <p class="section-desc">Personality-mapped from soft/sharp score.</p>
+        <div class="radius-grid">
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:0px;"></div>
+            <span class="radius-label">none</span>
+            <span class="radius-value">0px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:2px;"></div>
+            <span class="radius-label">xs</span>
+            <span class="radius-value">2px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:6px;"></div>
+            <span class="radius-label">sm</span>
+            <span class="radius-value">6px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:10px;"></div>
+            <span class="radius-label">md</span>
+            <span class="radius-value">10px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:16px;"></div>
+            <span class="radius-label">lg</span>
+            <span class="radius-value">16px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:20px;"></div>
+            <span class="radius-label">xl</span>
+            <span class="radius-value">20px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:32px;"></div>
+            <span class="radius-label">2xl</span>
+            <span class="radius-value">32px</span>
+        </div>
+        <div class="radius-demo">
+            <div class="radius-box" style="border-radius:9999px;"></div>
+            <span class="radius-label">full</span>
+            <span class="radius-value">9999px</span>
+        </div></div>
+    </section>
+  
+    <section class="preview-section" id="motion">
+        <h2>Motion</h2>
+        <p class="section-desc">Click the bars to see animation timing. Hover to preview.</p>
+        <div class="motion-demos">
+        <div class="motion-item" data-duration="80" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">micro: 80ms</span>
+        </div>
+        <div class="motion-item" data-duration="130" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">fast: 130ms</span>
+        </div>
+        <div class="motion-item" data-duration="210" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">normal: 210ms</span>
+        </div>
+        <div class="motion-item" data-duration="300" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">slow: 300ms</span>
+        </div>
+        <div class="motion-item" data-duration="420" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">slower: 420ms</span>
+        </div>
+        <div class="motion-item" data-duration="340" data-easing="standard">
+            <div class="motion-ball"></div>
+            <span class="motion-label">page: 340ms</span>
+        </div></div>
+    </section>
+  
+    <section class="preview-section" id="mockui">
+        <h2>Mock UI</h2>
+        <p class="section-desc">A sample card combining color, typography, spacing, and radius tokens.</p>
+        <div class="mock-container" style="background:#fbfbfb; padding:40px; border-radius:16px; font-family:"Inter", "Inter", "Helvetica Neue", Arial, sans-serif;">
+            <div class="mock-card" style="background:#ffffff; border:1px solid #b8bbbb; border-radius:16px; padding:40px; max-width:480px;">
+                <div style="display:flex; align-items:center; gap:24px; margin-bottom:32px;">
+                    <div style="width:48px; height:48px; border-radius:9999px; background:#e0ecee; display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:20px; color:#008f9f;">A</span>
+                    </div>
+                    <div>
+                        <div style="font-size:25.0px; font-weight:600; color:#1e1f20; line-height:1.3;">Design System</div>
+                        <div style="font-size:13.0px; color:#505354; margin-top:2px;">Auto-generated tokens preview</div>
+                    </div>
+                </div>
+                <p style="font-size:16.0px; color:#505354; line-height:1.6; margin-bottom:32px;">
+                    This card demonstrates how your design tokens work together. Colors, typography, spacing, and radius create a cohesive visual language.
+                </p>
+                <div style="display:flex; gap:20px;">
+                    <button class="mock-btn-primary" style="background:#008f9f; color:#f8fcfd; border:none; padding:20px 32px; border-radius:10px; font-size:16.0px; font-weight:500; cursor:pointer; font-family:inherit;">
+                        Primary Action
+                    </button>
+                    <button class="mock-btn-secondary" style="background:transparent; color:#008f9f; border:1px solid #008f9f; padding:20px 32px; border-radius:10px; font-size:16.0px; font-weight:500; cursor:pointer; font-family:inherit;">
+                        Secondary
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+  <footer>
+    Generated by Design Language Agent &middot; Deterministic tokens from design brief
+  </footer>
+
+<script>
+  // Motion demo: set transition duration from data attribute
+  document.querySelectorAll('.motion-item').forEach(item => {
+    const ms = item.dataset.duration;
+    const ball = item.querySelector('.motion-ball');
+    if (ball && ms) {
+      ball.style.transitionDuration = ms + 'ms';
+    }
+  });
+</script>
+</body>
+</html>

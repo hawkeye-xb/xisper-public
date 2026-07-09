@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Xisper — Press Fn, start speaking, and text appears. AI-powered voice dictation for macOS with role-specific vocabularies." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://xisper-landing.hawkeye-xb.com/" />
+    <meta property="og:title" content="Xisper — Voice Dictation for macOS" />
+    <meta property="og:description" content="Press Fn, start speaking, and text appears. Real-time transcription, AI polish, works in any app." />
+    <meta property="og:image" content="https://xisper-landing.hawkeye-xb.com/apple-touch-icon.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Xisper — Voice Dictation for macOS" />
+    <meta name="twitter:description" content="Press Fn, start speaking, and text appears. AI-powered voice dictation for macOS." />
+    <title>Xisper — Voice Dictation for macOS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script>
+      if (window.Paddle) {
+        Paddle.Initialize({
+          token: 'live_89b45ab3cd2e0ead67f4e5d093a',
+          checkout: {
+            settings: {
+              successUrl: 'https://xisper.hawkeye-xb.com/api/v1/payment/success'
+            }
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

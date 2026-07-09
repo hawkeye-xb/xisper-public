@@ -1,0 +1,23 @@
+{
+  "app_name": "Xisper",
+  "scenario": "macOS voice-to-text input tool for power users (programmers, doctors, lawyers) who need high-volume text input. Always running in background, activated via hotkey for quick voice capture sessions. Dark-mode-first, function-driven minimalism. The UI should be nearly monochrome with accent color used only at critical interaction points (recording state, primary CTA). No decoration, no expression — only serving the core action of voice-to-text.",
+  "session_duration": "short",
+  "core_actions": [
+    "Hotkey activation → voice input → auto-paste to active app",
+    "History review + hotword management",
+    "LLM post-processing + Webhook automation"
+  ],
+  "competitors": [
+    {"name": "Raycast", "liked_traits": ["clean", "efficient", "dark theme", "keyboard-first"]},
+    {"name": "Linear", "liked_traits": ["restrained", "professional", "high information density"]}
+  ],
+  "emotions": ["minimal", "focused", "functional", "quiet", "professional"],
+  "brand_colors": ["#13A4B5"],
+  "brand_fonts": ["Inter"],
+  "target_platforms": ["swiftui", "css"],
+  "personality_score": {
+    "playful_serious": 0.88,
+    "casual_formal": 0.82,
+    "soft_sharp": 0.35
+  }
+}
