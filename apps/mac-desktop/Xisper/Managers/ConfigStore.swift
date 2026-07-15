@@ -26,6 +26,7 @@ final class ConfigStore {
     private(set) var interceptSystemKey: Bool          = true
     private(set) var copyToClipboard: Bool             = true
     private(set) var enableHeadphoneButtonTrigger: Bool   = false
+    private(set) var autoEnterAfterPaste: Bool             = false
 
     // UI language override (empty = system)
     private(set) var uiLanguage: String               = ""
@@ -60,6 +61,9 @@ final class ConfigStore {
     func set(enableHeadphoneButtonTrigger v: Bool) {
         enableHeadphoneButtonTrigger = v; defaults.set(v, forKey: Keys.headphoneButtonTrigger)
     }
+    func set(autoEnterAfterPaste v: Bool) {
+        autoEnterAfterPaste = v; defaults.set(v, forKey: Keys.autoEnterAfterPaste)
+    }
     func set(uiLanguage v: String) {
         uiLanguage = v; defaults.set(v, forKey: Keys.uiLanguage)
         LanguageManager.shared.setLanguage(v)
@@ -84,6 +88,7 @@ final class ConfigStore {
         static let interceptKey     = "xisper.interceptSystemKey"
         static let copyToClipboard  = "xisper.copyToClipboard"
         static let headphoneButtonTrigger = "xisper.enableHeadphoneButtonTrigger"
+        static let autoEnterAfterPaste    = "xisper.autoEnterAfterPaste"
         static let uiLanguage       = "xisper.uiLanguage"
     }
 
@@ -96,6 +101,7 @@ final class ConfigStore {
         interceptSystemKey        = defaults.object(forKey: Keys.interceptKey) as? Bool ?? true
         copyToClipboard           = defaults.object(forKey: Keys.copyToClipboard) as? Bool ?? true
         enableHeadphoneButtonTrigger = defaults.object(forKey: Keys.headphoneButtonTrigger) as? Bool ?? false
+        autoEnterAfterPaste       = defaults.object(forKey: Keys.autoEnterAfterPaste) as? Bool ?? false
         uiLanguage                = defaults.string(forKey: Keys.uiLanguage) ?? ""
     }
 }
@@ -119,5 +125,9 @@ extension ConfigStore {
     var headphoneButtonTriggerBinding: Binding<Bool> {
         Binding(get: { self.enableHeadphoneButtonTrigger },
                 set: { self.set(enableHeadphoneButtonTrigger: $0) })
+    }
+    var autoEnterBinding: Binding<Bool> {
+        Binding(get: { self.autoEnterAfterPaste },
+                set: { self.set(autoEnterAfterPaste: $0) })
     }
 }

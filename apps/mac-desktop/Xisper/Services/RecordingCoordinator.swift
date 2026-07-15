@@ -46,6 +46,12 @@ enum RecordingState: Equatable {
     case committing
 }
 
+/// Which physical trigger initiated the current session.
+enum TriggerSource {
+    case fn         // FN key shortcut
+    case headphone  // Headphone play/pause button
+}
+
 // MARK: - RecordingCoordinator
 
 @Observable
@@ -67,6 +73,9 @@ final class RecordingCoordinator {
 
     /// Which hotkey action started this session ("dictation" or "translate").
     private(set) var currentActionId: String?
+
+    /// Which physical trigger initiated the current session.
+    private(set) var triggerSource: TriggerSource = .fn
 
     // MARK: - Private
 
@@ -100,6 +109,21 @@ final class RecordingCoordinator {
 
     /// Avoid running background warm-up more than once per process (mic indicator + I/O).
     private var didRunPipelineWarmup = false
+
+    // MARK: - Cancel-pending support
+    //
+    // ESC during finalizing/committing aborts the session. Discards the
+    // recording entirely — no DB record, no text injection, no webhook.
+    // Quota already consumed on the backend cannot be refunded.
+
+    /// Set by cancelPending(); checked at every await boundary in
+    /// stopSession / commitResult to bail out of the success path.
+    private var cancelRequested = false
+
+    /// Reference to the in-flight LLM postprocess Task so cancelPending
+    /// can interrupt the URLSession request immediately rather than
+    /// waiting up to 8s for the timeout.
+    private var currentLLMTask: Task<String, Error>?
 
     // MARK: - Silence auto-stop
 
@@ -145,6 +169,7 @@ final class RecordingCoordinator {
         flashBubbleError()
         state = .idle
         currentActionId = nil
+        triggerSource = .fn
         currentRecordingId = nil
         sessionPcmData = nil
         audioLevel = 0
@@ -184,6 +209,11 @@ final class RecordingCoordinator {
     }
 
     // MARK: - Key event entry points (called by HotkeySystem)
+
+    /// Set the physical trigger source for the next session. Resets to .fn after commitResult.
+    func setTriggerSource(_ source: TriggerSource) {
+        triggerSource = source
+    }
 
     func handleKeyPress(actionId: String = "dictation") async {
         recLog("handleKeyPress() — state=\(state), actionId=\(actionId)")
@@ -261,16 +291,20 @@ final class RecordingCoordinator {
     // MARK: - Session lifecycle
 
     private func startSession() async {
-        guard let token = try? await AuthManager.shared.getValidToken() else {
+        // Synchronous guard: token expired → immediate feedback, no retries.
+        // The background timer handles proactive refresh; at entry, we decide instantly.
+        guard AuthManager.shared.isTokenValid,
+              let token = AuthManager.shared.loadToken() else {
             recLog("startSession() — NOT AUTHENTICATED, navigating to login")
-            NotificationCenter.default.post(name: .navigateToAuth, object: nil)
             bringMainWindowToFront()
+            NotificationCenter.default.post(name: .navigateToAuth, object: nil)
             return
         }
 
         let usage = UsageManager.shared
         if usage.asrCharacters.limit > 0 && usage.asrCharacters.remaining <= 0 {
             recLog("startSession() — QUOTA EXCEEDED (characters), aborting")
+            Analytics.quotaHit(kind: "asr_chars", tier: usage.tier)
             errorMessage = "Weekly ASR quota exceeded. Resets \(usage.resetLabel)."
             SoundEffects.playError()
             bringMainWindowToFront()
@@ -278,6 +312,7 @@ final class RecordingCoordinator {
         }
         if usage.asrDuration.limit > 0 && usage.asrDuration.remaining <= 0 {
             recLog("startSession() — QUOTA EXCEEDED (duration), aborting")
+            Analytics.quotaHit(kind: "asr_duration", tier: usage.tier)
             errorMessage = "Weekly ASR duration exceeded. Resets \(usage.resetLabel)."
             SoundEffects.playError()
             bringMainWindowToFront()
@@ -300,6 +335,8 @@ final class RecordingCoordinator {
         autoRetryInProgress = false
         midRetryFailed = false
         sessionWasReady = false
+        cancelRequested = false
+        currentLLMTask = nil
         lastVoiceTime  = Date()  // assume voice at start; silence timer begins from here
         recLog("startSession() — state=recording, recordingId=\(currentRecordingId ?? "nil"), actionId=\(currentActionId ?? "nil")")
 
@@ -308,6 +345,13 @@ final class RecordingCoordinator {
 
         let userHotwords = HotwordsStore.shared.hotwords.map(\.text)
         let activeIdentityId = IdentityManager.shared.activeIdentityId
+
+        // Analytics: dictation session begins (mac hold-to-talk flow is always realtime streaming).
+        Analytics.dictationStarted(
+            sessionId: currentRecordingId ?? "unknown",
+            mode: "realtime",
+            identityId: activeIdentityId
+        )
 
         let asrConfig = ASRSessionConfig(
             language:          config.asrLanguage,
@@ -320,7 +364,14 @@ final class RecordingCoordinator {
             retranscribe:      nil
         )
 
-        if config.muteSystemDuringRecording { AudioController.muteSystem() }
+        if config.muteSystemDuringRecording {
+            // Delay mute 150ms so the start sound (NSSound "Tink") finishes playing
+            // before the output device is muted. Both share the same audio device,
+            // so immediate mute cuts off the sound asynchronously.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                AudioController.muteSystem()
+            }
+        }
 
         let client = ASRClient()
         asrClient  = client
@@ -463,6 +514,11 @@ final class RecordingCoordinator {
 
         if duration < 0.200 {
             recLog("stopSession() — MISTOUCH (<200ms), discarding")
+            Analytics.dictationCancelled(
+                sessionId: currentRecordingId ?? "unknown",
+                elapsedMs: Int(duration * 1000),
+                hadPartial: !liveText.isEmpty
+            )
             swapAudioTarget(nil)
             audioEngine.stop()
             _ = audioEngine.drainBuffer()
@@ -471,6 +527,7 @@ final class RecordingCoordinator {
             if ConfigStore.shared.muteSystemDuringRecording { AudioController.restoreSystem() }
             state = .idle
             currentActionId = nil
+            triggerSource = .fn
             currentRecordingId = nil
             return
         }
@@ -497,11 +554,17 @@ final class RecordingCoordinator {
             recLog("stopSession() — short recording silence check: duration=\(String(format: "%.0f", duration * 1000))ms, RMS=\(String(format: "%.1f", rms))")
             if rms < Self.silenceRMSThreshold {
                 recLog("stopSession() — SILENCE (RMS=\(String(format: "%.1f", rms)) < \(Self.silenceRMSThreshold)), discarding")
+                Analytics.dictationCancelled(
+                    sessionId: currentRecordingId ?? "unknown",
+                    elapsedMs: Int(duration * 1000),
+                    hadPartial: !liveText.isEmpty
+                )
                 asrClient?.close()
                 asrClient = nil
                 sessionPcmData = nil
                 state = .idle
                 currentActionId = nil
+                triggerSource = .fn
                 currentRecordingId = nil
                 return
             }
@@ -547,13 +610,23 @@ final class RecordingCoordinator {
                 await commitResult(text: text, start: start, recordingEnd: recordingEnd, client: client)
             }
         } catch {
+            if cancelRequested {
+                recLog("stopSession() — cancelled during finalizing, bailing out")
+                return
+            }
             let nsErr = error as NSError
             recLog("stopSession() — ASR final FAILED: domain=\(nsErr.domain) code=\(nsErr.code) desc=\(nsErr.localizedDescription)")
             if let err = error as? ASRClientError, err == .connectionFailed {
+                Analytics.dictationFailed(
+                    sessionId: currentRecordingId ?? "unknown",
+                    errorCode: "connection_failed",
+                    phase: "finalize"
+                )
                 asrClient?.close()
                 asrClient = nil
                 state = .idle
                 currentActionId = nil
+                triggerSource = .fn
                 currentRecordingId = nil
             } else {
                 recLog("stopSession() — attempting post-recording retranscribe as fallback")
@@ -627,6 +700,11 @@ final class RecordingCoordinator {
         autoRetryInProgress = true
         retryCount += 1
         recLog("handleMidRecordingDisconnect() — silent retry #\(retryCount), mic stays active")
+        Analytics.dictationRetry(
+            sessionId: currentRecordingId ?? "unknown",
+            retryIndex: retryCount,
+            reason: "disconnect"
+        )
 
         // Detach audio from the dead client immediately
         swapAudioTarget(nil)
@@ -763,6 +841,7 @@ final class RecordingCoordinator {
         asrClient = nil
         state = .idle
         currentActionId = nil
+        triggerSource = .fn
         currentRecordingId = nil
 
         if isServiceError {
@@ -803,8 +882,10 @@ final class RecordingCoordinator {
             if isTranslateMode {
                 recLog("commitResult() — starting LLM translation")
                 let instruction = TranslateSettings.shared.getTranslationInstruction()
-                do {
-                    finalText = try await withThrowingTaskGroup(of: String.self) { group in
+                let speechLanguage = self.currentAsrLanguage
+                let activeIdentityId = IdentityManager.shared.activeIdentityId
+                let llmTask = Task<String, Error> {
+                    try await withThrowingTaskGroup(of: String.self) { group in
                         group.addTask {
                             try await LLMPostprocessClient.process(
                                 rawText: itnText,
@@ -813,9 +894,9 @@ final class RecordingCoordinator {
                                 hotwords: allHotwords.isEmpty ? nil : allHotwords,
                                 voiceMode: "translation",
                                 translationInstruction: instruction,
-                                speechLanguage: self.currentAsrLanguage,
+                                speechLanguage: speechLanguage,
                                 identityContext: identityLabel != nil ? "\(identityLabel!)\(identityDesc.map { " — \($0)" } ?? "")" : nil,
-                                identityId: IdentityManager.shared.activeIdentityId
+                                identityId: activeIdentityId
                             )
                         }
                         group.addTask {
@@ -826,24 +907,31 @@ final class RecordingCoordinator {
                         group.cancelAll()
                         return result
                     }
+                }
+                currentLLMTask = llmTask
+                do {
+                    finalText = try await llmTask.value
                     recLog("commitResult() — LLM translation done: \(finalText.prefix(80))")
                 } catch {
                     recLog("commitResult() — LLM translation failed/timeout: \(error), using ITN text")
                     finalText = itnText
                 }
+                currentLLMTask = nil
             } else {
                 recLog("commitResult() — starting LLM postprocess")
-                do {
-                    finalText = try await withThrowingTaskGroup(of: String.self) { group in
+                let speechLanguage = self.currentAsrLanguage
+                let activeIdentityId = IdentityManager.shared.activeIdentityId
+                let llmTask = Task<String, Error> {
+                    try await withThrowingTaskGroup(of: String.self) { group in
                         group.addTask {
                             try await LLMPostprocessClient.process(
                                 rawText: itnText,
                                 context: ctx,
                                 corrections: corrections.isEmpty ? nil : corrections,
                                 hotwords: allHotwords.isEmpty ? nil : allHotwords,
-                                speechLanguage: self.currentAsrLanguage,
+                                speechLanguage: speechLanguage,
                                 identityContext: identityLabel != nil ? "\(identityLabel!)\(identityDesc.map { " — \($0)" } ?? "")" : nil,
-                                identityId: IdentityManager.shared.activeIdentityId
+                                identityId: activeIdentityId
                             )
                         }
                         group.addTask {
@@ -854,12 +942,27 @@ final class RecordingCoordinator {
                         group.cancelAll()
                         return result
                     }
+                }
+                currentLLMTask = llmTask
+                do {
+                    finalText = try await llmTask.value
                     recLog("commitResult() — LLM postprocess done: \(finalText.prefix(80))")
                 } catch {
                     recLog("commitResult() — LLM postprocess failed/timeout: \(error), using ITN text")
                     finalText = itnText
                 }
+                currentLLMTask = nil
             }
+        }
+
+        // Cancel check: ESC may have fired during LLM await. This is the only
+        // bail-out point — MainActor is serial and nothing below awaits before
+        // the DB write, so cancel can't sneak in to leave a half-written record.
+        // If ESC fires during InputWriter.write the Cmd+V is already dispatched
+        // (physical limit, can't recall) — we let the commit finish.
+        if cancelRequested {
+            recLog("commitResult() — cancelled after LLM, bailing out (no record, no injection, no webhook)")
+            return
         }
 
         lastText = finalText
@@ -897,13 +1000,19 @@ final class RecordingCoordinator {
         try? dbContext.save()
 
         // Inject final text into the focused app
+        var didAutoWrite = false
         if !finalText.isEmpty {
             recLog("commitResult() — injecting text: \(finalText.prefix(80))")
-            let result = await InputWriter.write(finalText)
-            recLog("commitResult() — InputWriter result=\(result)")
+            let useAutoEnter = triggerSource == .headphone && ConfigStore.shared.autoEnterAfterPaste
+            let result = useAutoEnter
+                ? await InputWriter.writeAndPressEnter(finalText)
+                : await InputWriter.write(finalText)
+            recLog("commitResult() — InputWriter result=\(result) autoEnter=\(useAutoEnter)")
             if !result.success {
                 errorMessage = result.error
                 flashBubbleError()
+            } else {
+                didAutoWrite = true
             }
         } else {
             recLog("commitResult() — empty finalText, skipping injection")
@@ -923,9 +1032,36 @@ final class RecordingCoordinator {
         client.close()
         asrClient = nil
         state = .idle
+
+        // ── Analytics: core-loop success (capture before ids are cleared) ──
+        let committedSessionId = currentRecordingId ?? "unknown"
+        let latencyMs = Int(Date().timeIntervalSince(start) * 1000)
+        Analytics.dictationCommitted(
+            sessionId: committedSessionId,
+            durationMs: Int(recordingDuration * 1000),
+            latencyMs: latencyMs,
+            charCount: finalText.count,
+            retryCount: retryCount
+        )
+        if didAutoWrite {
+            Analytics.resultUsed(sessionId: committedSessionId, via: "autowrite")
+        }
+        // Postprocess ran for dictation-mode utterances long enough to be worth it.
+        if !isTranslateMode {
+            Analytics.postprocessUsed(sessionId: committedSessionId, enabled: meaningfulCount >= 4)
+        }
+        // Activation milestone: first-ever successful dictation.
+        let firstDictKey = "analytics.firstDictationDone"
+        if didAutoWrite, !UserDefaults.standard.bool(forKey: firstDictKey) {
+            UserDefaults.standard.set(true, forKey: firstDictKey)
+            let since = Int(Date().timeIntervalSince(AppDelegate.launchTime))
+            Analytics.firstDictationSuccess(secondsSinceLaunch: max(0, since))
+        }
+
         recLog("commitResult() — clearing currentActionId (was: \(currentActionId ?? "nil"))")
         CrashLogger.log("RecordingCoordinator", "commitResult END — clearing currentActionId (was: \(currentActionId ?? "nil"))")
         currentActionId = nil
+        triggerSource = .fn
         currentRecordingId = nil
         recLog("commitResult() — done, state=idle")
 
@@ -935,6 +1071,71 @@ final class RecordingCoordinator {
             recLog("commitResult() — triggering usage refresh")
             await UsageManager.shared.refresh()
             recLog("commitResult() — usage refresh done, chars=\(UsageManager.shared.asrCharacters.used)/\(UsageManager.shared.asrCharacters.limit)")
+        }
+    }
+
+    // MARK: - Cancel pending
+
+    /// Abort the active session. Triggered by ESC during recording,
+    /// finalizing, or committing. Discards everything: no DB record,
+    /// no text injection, no webhook.
+    /// ASR/LLM quota already consumed on the backend cannot be refunded —
+    /// usage refresh is scheduled so the UI reflects the real remaining quota.
+    func cancelPending() async {
+        CrashLogger.log("RecordingCoordinator", "cancelPending ENTER — state=\(state)")
+        guard state != .idle else {
+            recLog("cancelPending() — IGNORED, state=idle")
+            CrashLogger.log("RecordingCoordinator", "cancelPending IGNORED — state=idle")
+            return
+        }
+        let priorState = state
+        recLog("cancelPending() — state=\(priorState), aborting session")
+        CrashLogger.log("RecordingCoordinator", "cancelPending PROCEED — state=\(priorState)")
+
+        cancelRequested = true
+
+        currentLLMTask?.cancel()
+        currentLLMTask = nil
+
+        // Detach audio routing first to prevent the render thread from
+        // touching a half-closed ASR client.
+        swapAudioTarget(nil)
+
+        // Audio engine is only live during .recording. In .finalizing /
+        // .committing stopSession has already stopped it — calling stop()
+        // again is a no-op but safe.
+        if priorState == .recording {
+            audioEngine.stop()
+            _ = audioEngine.drainBuffer()
+        }
+
+        asrClient?.close()
+        asrClient = nil
+
+        if ConfigStore.shared.muteSystemDuringRecording { AudioController.restoreSystem() }
+
+        sessionPcmData = nil
+        capturedContext = nil
+        liveText = ""
+        audioLevel = 0
+        autoRetryInProgress = false
+        midRetryFailed = false
+
+        state = .idle
+        currentActionId = nil
+        triggerSource = .fn
+        currentRecordingId = nil
+
+        // Only play stop sound when cancelling from .recording — in finalizing
+        // / committing the stop sound was already played by stopSession().
+        // Playing twice triggers "NSSound: Already playing." warnings.
+        if priorState == .recording {
+            SoundEffects.playStop()
+        }
+
+        Task {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            await UsageManager.shared.refresh()
         }
     }
 

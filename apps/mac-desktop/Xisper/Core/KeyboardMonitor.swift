@@ -204,7 +204,10 @@ private func handleKeyDown(event: CGEvent, keyCode: Int32) -> Unmanaged<CGEvent>
     // Skip notification on auto-repeat (key already tracked, nothing changed).
     let isNew = pressingKeys[keyCode] == nil
     pressingKeys[keyCode] = keyName
-    if isNew { notifyState() }
+    if isNew {
+        if keyName == "Escape" { kbLog("keyDown: ESC (keyCode=0x35) seen by tap") }
+        notifyState()
+    }
     return shouldConsume() ? nil : Unmanaged.passRetained(event)
 }
 
@@ -217,6 +220,23 @@ private func handleKeyUp(event: CGEvent, keyCode: Int32) -> Unmanaged<CGEvent>? 
 // MARK: - systemDefined (media key trigger)
 
 private func handleSystemDefined(event: CGEvent) -> Unmanaged<CGEvent>? {
+    #if DEBUG || BETA
+    // Diagnostics for issue #25 (headphone button trigger not firing). Logs EVERY
+    // aux-control (subtype 8, media buttons) event that reaches the tap, regardless
+    // of the enable toggle below — so we can tell whether the AirPods play/pause
+    // event arrives at all, and how it decodes (keyCode 16 = NX_KEYTYPE_PLAY).
+    //   • no log on press  → event never reaches the tap (consumed upstream / VM grab)
+    //   • log but keyCode≠16 → device reports a different code, extend the match
+    //   • log with keyCode=16 & isDown → arrives fine; bug is downstream of here
+    if let ns = NSEvent(cgEvent: event), ns.subtype.rawValue == 8 {
+        let d1 = ns.data1
+        let kc = Int32((d1 & 0xFFFF0000) >> 16)
+        let kf = d1 & 0x0000FFFF
+        let down = ((kf & 0xFF00) >> 8) == 0x0A
+        kbLog("systemDefined aux: keyCode=\(kc) isDown=\(down) triggerEnabled=\(ConfigStore.shared.enableHeadphoneButtonTrigger)")
+    }
+    #endif
+
     // Quick early-out if media key trigger not enabled
     guard ConfigStore.shared.enableHeadphoneButtonTrigger else {
         return Unmanaged.passRetained(event)

@@ -151,6 +151,21 @@ final class HotkeySystem {
 
         // Lowercase for matching (targets store lowercased keys)
         let lowered = Set(pressedKeys.map { $0.lowercased() })
+        let previousLowered = Set(previousPressedKeys.map { $0.lowercased() })
+
+        // ESC during recording / finalizing / committing aborts the session.
+        // Detect rising edge only, so a held ESC fires once.
+        // We don't consume the event — system + foreground app still get ESC.
+        if lowered.contains("escape") && !previousLowered.contains("escape") {
+            let coordinator = RecordingCoordinator.shared
+            CrashLogger.log("HotkeySystem", "ESC pressed — coordinator.state=\(coordinator.state)")
+            if coordinator.state != .idle {
+                CrashLogger.log("HotkeySystem", "ESC during \(coordinator.state) — calling cancelPending")
+                Task { @MainActor in await coordinator.cancelPending() }
+            } else {
+                CrashLogger.log("HotkeySystem", "ESC ignored — state is idle")
+            }
+        }
 
         let matched = targets.first { $0.keys == lowered }
 
@@ -267,6 +282,7 @@ final class HotkeySystem {
         let coordinator = RecordingCoordinator.shared
         switch coordinator.state {
         case .idle:
+            coordinator.setTriggerSource(.headphone)
             Task { await coordinator.handleKeyPress(actionId: "dictation") }
         case .recording:
             Task { await coordinator.handleKeyRelease() }

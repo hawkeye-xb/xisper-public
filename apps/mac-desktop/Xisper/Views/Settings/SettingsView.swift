@@ -99,6 +99,7 @@ struct SettingRow: View {
 
 private struct PreferencesCard: View {
     @AppStorage("AppleInterfaceStyle") private var interfaceStyle: String?
+    @State private var analyticsOptedOut = Analytics.isOptedOut
 
     private var config: ConfigStore { ConfigStore.shared }
     private var translateSettings: TranslateSettings { TranslateSettings.shared }
@@ -230,6 +231,26 @@ private struct PreferencesCard: View {
                     .labelsHidden()
             }
             .padding(.vertical, 8)
+
+            CardDivider()
+
+            // Anonymous analytics (privacy opt-out). We never collect transcript
+            // content, audio, or clipboard text — only anonymous usage counts to
+            // improve the app. Users can turn this off entirely.
+            HStack(alignment: .center) {
+                SettingRow(NSLocalizedString("Share Anonymous Usage Data", comment: ""), description: NSLocalizedString("Help improve Xisper by sending anonymous usage statistics. Never includes your transcriptions, audio, or clipboard.", comment: ""))
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { !analyticsOptedOut },
+                    set: { enabled in
+                        analyticsOptedOut = !enabled
+                        Analytics.setOptOut(!enabled)
+                    }
+                ))
+                .toggleStyle(.switch)
+                .labelsHidden()
+            }
+            .padding(.vertical, 8)
         }
     }
 
@@ -292,6 +313,17 @@ private struct ShortcutsCard: View {
                 SettingRow(NSLocalizedString("Headphone Button Trigger", comment: ""), description: NSLocalizedString("Toggle recording with the Play button on wired or wireless headphones. Music apps won't receive this button press while enabled.", comment: ""))
                 Spacer()
                 Toggle("", isOn: config.headphoneButtonTriggerBinding)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+            }
+            .padding(.vertical, 8)
+
+            CardDivider()
+
+            HStack(alignment: .center) {
+                SettingRow(NSLocalizedString("Auto-Enter After Paste", comment: ""), description: NSLocalizedString("When pasting text triggered by a headphone button, automatically press Enter to send the message. Only applies to headphone button trigger, not FN key shortcuts.", comment: ""))
+                Spacer()
+                Toggle("", isOn: config.autoEnterBinding)
                     .toggleStyle(.switch)
                     .labelsHidden()
             }
