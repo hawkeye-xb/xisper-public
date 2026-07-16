@@ -325,7 +325,6 @@
 						ProvisioningStyle = Automatic;
 					};
 					35B8E38C47733481DD2BADF7 = {
-						DevelopmentTeam = 2WJUWVUJBN;
 					};
 				};
 			};
@@ -550,7 +549,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 2WJUWVUJBN;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Xisper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Xisper (Beta)";
@@ -562,10 +560,15 @@
 				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "xyz.hawkeye-xb.xisper-mac.beta";
 				PRODUCT_NAME = "Xisper-beta";
+				SPARKLE_PUBLIC_ED_KEY = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.10;
+				XISPER_APPCAST_URL = "http://localhost:8787/api/v1/app/mac/updates/feed/beta";
+				XISPER_LOGTO_APP_ID = "your-logto-app-id";
+				XISPER_LOGTO_ENDPOINT = "https://your-tenant.logto.app";
+				XISPER_SERVICE_BASE_URL = "http://localhost:8787";
 				XISPER_URL_SCHEME = "xisper-mac-beta";
 			};
 			name = Debug;
@@ -633,12 +636,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Xisper/Xisper.entitlements;
-				CODE_SIGN_IDENTITY = "Developer ID Application: Zhaowen Li (2WJUWVUJBN)";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 2WJUWVUJBN;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Xisper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Xisper;
@@ -650,11 +651,15 @@
 				MARKETING_VERSION = 0.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "xyz.hawkeye-xb.xisper-mac";
 				PRODUCT_NAME = Xisper;
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				SPARKLE_PUBLIC_ED_KEY = "";
 				SDKROOT = macosx;
 				STRIP_SWIFT_SYMBOLS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.10;
+				XISPER_APPCAST_URL = "http://localhost:8787/api/v1/app/mac/updates/feed/beta";
+				XISPER_LOGTO_APP_ID = "your-logto-app-id";
+				XISPER_LOGTO_ENDPOINT = "https://your-tenant.logto.app";
+				XISPER_SERVICE_BASE_URL = "http://localhost:8787";
 				XISPER_URL_SCHEME = "xisper-mac";
 			};
 			name = Release;

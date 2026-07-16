@@ -81,11 +81,10 @@ async function generateIcns() {
 }
 
 async function main() {
-  const appSvg = join(ICONS_ROOT, 'svg', 'xisper_app.svg')
   const macosSvg = join(ICONS_ROOT, 'svg', 'xisper_primary_macos.svg')
   const blackSvg = join(ICONS_ROOT, 'svg', 'xisper_black.svg')
 
-  await generateIconset(appSvg)
+  await generateIconset(macosSvg)
   await generateMacosIconset(macosSvg)
   await generateTray(blackSvg)
   await generateIcns()

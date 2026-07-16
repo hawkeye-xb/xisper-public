@@ -8,6 +8,14 @@
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>XisperServiceBaseURL</key>
+	<string>$(XISPER_SERVICE_BASE_URL)</string>
+	<key>XisperLogtoEndpoint</key>
+	<string>$(XISPER_LOGTO_ENDPOINT)</string>
+	<key>XisperLogtoAppID</key>
+	<string>$(XISPER_LOGTO_APP_ID)</string>
+	<key>XisperAppcastURL</key>
+	<string>$(XISPER_APPCAST_URL)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -40,8 +48,8 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://xisper-dev.hawkeye-xb.com/api/v1/app/mac/updates/feed/beta</string>
+	<string>$(XISPER_APPCAST_URL)</string>
 	<key>SUPublicEDKey</key>
-	<string>JO0NyLKXTlK28OWUvMR8nwj5paghkj1RrAOb5g7BZsk=</string>
+	<string>$(SPARKLE_PUBLIC_ED_KEY)</string>
 </dict>
 </plist>

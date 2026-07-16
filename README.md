@@ -6,7 +6,7 @@
 
 Xisper is a native macOS voice-to-text tool that lives in your menu bar. Press and hold a hotkey, talk, and let go; Xisper streams your speech to a speech-recognition engine, cleans it up with an LLM, and types the result straight into the app you're focused on — your editor, your email, your chat window, anywhere.
 
-This repository is the **full source** of Xisper: the macOS client, the Cloudflare Workers backend, the landing page, and the admin panel.
+This repository contains the open-source Xisper client and a self-hostable Cloudflare backend. Official hosted-service operations and credentials are intentionally not included.
 
 ## Why this exists
 
@@ -15,7 +15,7 @@ Dictation on the Mac has historically meant one of two things: the built-in tool
 - **Fast** — real-time streaming transcription, text inserted the moment you release the key.
 - **Affordable** — a pricing model that doesn't punish heavy users.
 - **Context-aware** — AI post-processing fixes technical terms, names, and jargon; a translation mode lets you speak one language and type another.
-- **Honest about privacy** — we transcribe and post-process; we don't hoard your audio or transcripts. The analytics in the client are behavioral counts only (opt-out available), never your text.
+- **Honest about privacy** — the open-source client sends no analytics. Audio and text are relayed only to the providers selected by the operator.
 
 Open-sourcing it is an invitation: see exactly how a production voice-input product is wired end to end, learn from it, or run your own.
 
@@ -41,7 +41,7 @@ Xisper is a pnpm + Turbo monorepo:
 | `apps/landing` | Marketing / download site | Vue 3, Vite SSG → Cloudflare Pages |
 | `apps/admin` | Internal admin panel | — |
 
-External services: **Logto** (identity), **Creem** (payments), **Supabase** (auth/data), **Cloudflare** (Workers/D1/KV/R2/Pages).
+External services: **Logto** (identity), **Creem** (the supported payment adapter), **Cloudflare** (Workers/D1/KV/R2/Pages), plus whichever ASR and LLM providers the operator enables. Paddle and Polar adapters are experimental and their webhooks fail closed.
 
 ## Getting started
 
@@ -62,12 +62,32 @@ cp apps/mac-desktop/.env.build.example apps/mac-desktop/.env.build
 
 The `wrangler.toml.example` files use placeholders like `<D1_DATABASE_ID_DEV>` — replace them with your own Cloudflare KV namespace IDs, D1 database IDs, domains, and Logto tenant. The real `wrangler.toml` is gitignored so your IDs never get committed. Never put API keys in `wrangler.toml`; use `wrangler secret put`.
 
+Payment catalog identifiers are environment-driven as well. Configure
+`CREEM_PRODUCT_PRO_MONTHLY` and `CREEM_PRODUCT_PRO_YEARLY` for the default
+provider; the optional Paddle and Polar adapters use their corresponding values
+documented in `apps/services/.dev.vars.example`.
+
 ```bash
-pnpm install
-pnpm dev            # run the workspace in dev
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev            # run packages that expose a dev script
 ```
 
-To build the macOS client, see `apps/mac-desktop/scripts/build-and-release.sh`.
+To build the macOS client, see `apps/mac-desktop/scripts/build-and-release.sh`. A macOS machine with Xcode and XcodeGen is required.
+
+## Security and privacy
+
+- Never deploy the example configuration unchanged.
+- Set Worker secrets with `wrangler secret put`; do not place them in TOML files.
+- Configure `ALLOWED_ORIGINS` explicitly outside local development.
+- Bootstrap the admin account only with `ADMIN_SETUP_SECRET`, then remove that secret.
+- Review each ASR/LLM provider's data retention policy before sending real user data.
+
+Please report vulnerabilities privately as described in [SECURITY.md](./SECURITY.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). The official hosted service may contain additional private modules; public contributions should not depend on them.
 
 ## License
 

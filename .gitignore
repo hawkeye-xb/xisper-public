@@ -25,6 +25,7 @@ build/output
 dist
 *dist*
 *release*
+packages/Xisper_Icons/iconset/
 
 # Debug
 npm-debug.log*

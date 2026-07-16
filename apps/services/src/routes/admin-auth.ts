@@ -95,8 +95,8 @@ adminAuth.post('/setup', async (c) => {
 
   const { username, password } = await c.req.json<{ username: string; password: string }>();
 
-  if (!username || !password || password.length < 6) {
-    return c.json({ success: false, error: 'Username and password (min 6 chars) required' }, 400);
+  if (!username || !password || password.length < 14) {
+    return c.json({ success: false, error: 'Username and password (min 14 chars) required' }, 400);
   }
 
   const id = `admin_${Date.now()}`;

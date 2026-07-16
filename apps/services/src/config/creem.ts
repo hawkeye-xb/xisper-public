@@ -12,25 +12,15 @@ export const CREEM_CONFIG = {
   testApiBase: 'https://test-api.creem.io/v1',
 } as const;
 
-/**
- * Product ID mapping — separate for sandbox (beta/dev) and live (production).
- */
-const CREEM_PRODUCTS_LIVE = {
-  pro_monthly: 'prod_6hAeBM1s9mjR0GtvFC7n4j',
-  pro_yearly: 'prod_VYsWgRXBE1dDyGvNq8uCb',
-} as const;
-
-const CREEM_PRODUCTS_SANDBOX = {
-  pro_monthly: 'prod_39f6MsqasslsJVAkjX4Bjq',
-  pro_yearly: 'prod_4cIajPNIbxIM550j4MBOgk',
-} as const;
-
-export function getCreemProducts(environment: string) {
-  return environment === 'production' ? CREEM_PRODUCTS_LIVE : CREEM_PRODUCTS_SANDBOX;
+export function getCreemProducts(env: {
+  CREEM_PRODUCT_PRO_MONTHLY?: string;
+  CREEM_PRODUCT_PRO_YEARLY?: string;
+}) {
+  return {
+    pro_monthly: env.CREEM_PRODUCT_PRO_MONTHLY,
+    pro_yearly: env.CREEM_PRODUCT_PRO_YEARLY,
+  };
 }
-
-/** @deprecated Use getCreemProducts(environment) instead */
-export const CREEM_PRODUCTS = CREEM_PRODUCTS_LIVE;
 
 /**
  * Map Creem subscription status to internal tier.

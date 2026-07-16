@@ -89,6 +89,11 @@ export function getPaymentProvider(
     POLAR_ACCESS_TOKEN?: string;
     PADDLE_ACCESS_TOKEN?: string;
     PADDLE_VENDOR_ID?: string;
+    CREEM_PRODUCT_PRO_MONTHLY?: string;
+    CREEM_PRODUCT_PRO_YEARLY?: string;
+    POLAR_PRODUCT_PRO_MONTHLY?: string;
+    PADDLE_PRICE_PRO_MONTHLY?: string;
+    POLAR_SERVER?: string;
     ENVIRONMENT?: string;
   },
   logger?: { info: (msg: string) => void; warn: (msg: string) => void }
@@ -105,20 +110,20 @@ export function getPaymentProvider(
       if (!env.PADDLE_ACCESS_TOKEN) {
         throw new Error('PADDLE_ACCESS_TOKEN is required when PAYMENT_PROVIDER=paddle');
       }
-      return createPaddleProvider(env.PADDLE_ACCESS_TOKEN, env.PADDLE_VENDOR_ID, env.ENVIRONMENT);
+      return createPaddleProvider(env.PADDLE_ACCESS_TOKEN, env.PADDLE_VENDOR_ID, env.ENVIRONMENT, getPaddleProducts(env));
 
     case 'polar':
       if (!env.POLAR_ACCESS_TOKEN) {
         throw new Error('POLAR_ACCESS_TOKEN is required when PAYMENT_PROVIDER=polar');
       }
-      return createPolarProvider(env.POLAR_ACCESS_TOKEN);
+      return createPolarProvider(env.POLAR_ACCESS_TOKEN, getPolarProducts(env), env.POLAR_SERVER);
 
     case 'creem':
     default:
       if (!env.CREEM_API_KEY) {
         throw new Error('CREEM_API_KEY is required when PAYMENT_PROVIDER=creem');
       }
-      return createCreemProvider(env.CREEM_API_KEY, env.ENVIRONMENT);
+      return createCreemProvider(env.CREEM_API_KEY, env.ENVIRONMENT, getCreemProducts(env));
   }
 }
 
@@ -128,12 +133,18 @@ export function getPaymentProvider(
 
 import { getCreemProducts, getCreemApiBase } from './creem';
 
-function createCreemProvider(apiKey: string, environment = 'development'): PaymentProvider {
+function createCreemProvider(
+  apiKey: string,
+  environment = 'development',
+  products: ReturnType<typeof getCreemProducts> = {
+    pro_monthly: undefined,
+    pro_yearly: undefined,
+  }
+): PaymentProvider {
   return {
     source: 'creem',
 
     async createCheckout(params) {
-      const products = getCreemProducts(environment);
       const productId = products[params.productId as keyof typeof products];
       if (!productId) {
         throw new Error(`Unknown product: ${params.productId}`);
@@ -253,16 +264,19 @@ function createCreemProvider(apiKey: string, environment = 'development'): Payme
 // Polar Provider Implementation
 // ============================================
 
-import { POLAR_PRODUCTS, getPolarApiBase } from './polar';
+import { getPolarProducts, getPolarApiBase } from './polar';
 
-function createPolarProvider(accessToken: string): PaymentProvider {
-  let server = 'sandbox';  // Use sandbox for development
+function createPolarProvider(
+  accessToken: string,
+  products: ReturnType<typeof getPolarProducts>,
+  server = 'sandbox'
+): PaymentProvider {
 
   return {
     source: 'polar',
 
     async createCheckout(params) {
-      const productId = POLAR_PRODUCTS[params.productId as keyof typeof POLAR_PRODUCTS];
+      const productId = products[params.productId as keyof typeof products];
       if (!productId) {
         throw new Error(`Unknown product: ${params.productId}`);
       }
@@ -392,6 +406,11 @@ export function createPaymentProvider(env: {
   POLAR_ACCESS_TOKEN?: string;
   PADDLE_ACCESS_TOKEN?: string;
   PADDLE_VENDOR_ID?: string;
+  CREEM_PRODUCT_PRO_MONTHLY?: string;
+  CREEM_PRODUCT_PRO_YEARLY?: string;
+  POLAR_PRODUCT_PRO_MONTHLY?: string;
+  PADDLE_PRICE_PRO_MONTHLY?: string;
+  POLAR_SERVER?: string;
   ENVIRONMENT?: string;
 }): PaymentProvider {
   return getPaymentProvider(env, {
@@ -406,12 +425,16 @@ export function createPaymentProvider(env: {
 
 import { getPaddleProducts, getPaddleApiBase } from './paddle';
 
-function createPaddleProvider(accessToken: string, vendorId?: string, environment = 'sandbox'): PaymentProvider {
+function createPaddleProvider(
+  accessToken: string,
+  vendorId?: string,
+  environment = 'sandbox',
+  products: ReturnType<typeof getPaddleProducts> = { pro_monthly: undefined }
+): PaymentProvider {
   return {
     source: 'paddle',
 
     async createCheckout(params) {
-      const products = getPaddleProducts(environment);
       const priceId = products[params.productId as keyof typeof products];
       if (!priceId) {
         throw new Error(`Unknown product: ${params.productId}`);

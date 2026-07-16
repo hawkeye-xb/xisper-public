@@ -9,7 +9,8 @@ compatibility_flags = ["nodejs_compat"]
 # `wrangler.toml` is gitignored so real IDs never get committed.
 #
 # Secrets (never put these here — use `wrangler secret put`):
-#   DEEPSEEK_API_KEY, SONIOX_API_KEY
+#   DEEPSEEK_API_KEY, SONIOX_API_KEY, CREEM_API_KEY,
+#   PAYMENT_WEBHOOK_SECRET, ADMIN_JWT_SECRET, ADMIN_SETUP_SECRET
 # ─────────────────────────────────────────────────────────────
 
 # Enable observability
@@ -61,7 +62,7 @@ bucket_name = "xisper-releases"
 # Development environment (default)
 # ============================================
 [env.development]
-vars = { ENVIRONMENT = "development", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+vars = { ENVIRONMENT = "development", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/", ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173" }
 # DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env development`
 # SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env development`
 

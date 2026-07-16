@@ -12,20 +12,8 @@ export const PADDLE_CONFIG = {
   sandboxApiBase: 'https://sandbox-api.paddle.com',
 } as const;
 
-/**
- * Product/Price ID mapping — separate for sandbox and live
- * Created in Paddle Dashboard → Catalog → Products
- */
-const PADDLE_PRODUCTS_LIVE = {
-  pro_monthly: 'pri_01knh90kgs1h8qg4h6wgrcpnxj',
-} as const;
-
-const PADDLE_PRODUCTS_SANDBOX = {
-  pro_monthly: 'pri_01knkehsb275472d2bmq4rq4dq',
-} as const;
-
-export function getPaddleProducts(environment: string) {
-  return environment === 'production' ? PADDLE_PRODUCTS_LIVE : PADDLE_PRODUCTS_SANDBOX;
+export function getPaddleProducts(env: { PADDLE_PRICE_PRO_MONTHLY?: string }) {
+  return { pro_monthly: env.PADDLE_PRICE_PRO_MONTHLY };
 }
 
 /**

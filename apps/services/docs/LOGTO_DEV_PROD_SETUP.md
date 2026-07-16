@@ -1,8 +1,8 @@
 # Logto Dev/Prod Environment Setup
 
-Tenant: `fn2daz.logto.app` (shared endpoint, different appId per env)
+Tenant: `your-tenant.logto.app` (shared endpoint, different appId per env)
 
-## 1. xisper-dev Application (App ID: 2mepw39zb3jt55dnht427)
+## 1. xisper-dev Application (App ID: your-beta-logto-app-id)
 
 **Used for**: Beta env + local development (DV)
 
@@ -33,7 +33,7 @@ http://localhost:7010
 
 ---
 
-## 2. xisper-prod Application (App ID: vnd5x8k6zuotvpfm4o5tc)
+## 2. xisper-prod Application (App ID: your-production-logto-app-id)
 
 Logto Console → Applications → xisper-prod → 端点和凭据
 
@@ -64,17 +64,17 @@ cd apps/services
 
 # Beta
 wrangler secret put LOGTO_ENDPOINT --env beta
-# Input: https://fn2daz.logto.app
+# Input: https://your-tenant.logto.app
 
 wrangler secret put LOGTO_APP_ID --env beta
-# Input: 2mepw39zb3jt55dnht427
+# Input: your-beta-logto-app-id
 
 # Production
 wrangler secret put LOGTO_ENDPOINT --env production
-# Input: https://fn2daz.logto.app
+# Input: https://your-tenant.logto.app
 
 wrangler secret put LOGTO_APP_ID --env production
-# Input: vnd5x8k6zuotvpfm4o5tc
+# Input: your-production-logto-app-id
 ```
 
 ---
@@ -82,10 +82,11 @@ wrangler secret put LOGTO_APP_ID --env production
 ## 4. Admin Build Env (optional, for CI/CD)
 
 If admin build needs explicit Logto vars:
-- Beta: `VITE_LOGTO_ENDPOINT=https://fn2daz.logto.app` `VITE_LOGTO_APP_ID=2mepw39zb3jt55dnht427`
-- Prod: `VITE_LOGTO_ENDPOINT=https://fn2daz.logto.app` `VITE_LOGTO_APP_ID=vnd5x8k6zuotvpfm4o5tc`
+- Beta: `VITE_LOGTO_ENDPOINT=https://your-tenant.logto.app` `VITE_LOGTO_APP_ID=your-beta-logto-app-id`
+- Prod: `VITE_LOGTO_ENDPOINT=https://your-tenant.logto.app` `VITE_LOGTO_APP_ID=your-production-logto-app-id`
 
-Admin `config.ts` already has these hardcoded, so usually not needed.
+Set `VITE_API_BASE_URL` for each Admin deployment. The source defaults to
+`http://localhost:8787` and contains no hosted API endpoint.
 
 ---
 

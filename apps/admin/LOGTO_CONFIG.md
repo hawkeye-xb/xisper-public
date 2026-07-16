@@ -4,21 +4,21 @@
 
 To ensure proper logout and account switching functionality, configure the following in your Logto Cloud application:
 
-### Beta Environment (App ID: 2mepw39zb3jt55dnht427)
+### Beta Environment (App ID: `your-beta-logto-app-id`)
 
 1. **Redirect URIs** (already configured):
-   - `https://xisper-admin-beta.hawkeye-xb.com/callback`
+   - `https://<YOUR_BETA_ADMIN_DOMAIN>/callback`
 
 2. **Post Sign-out Redirect URIs** (MUST be configured):
-   - `https://xisper-admin-beta.hawkeye-xb.com/`
+   - `https://<YOUR_BETA_ADMIN_DOMAIN>/`
 
-### Production Environment (App ID: vnd5x8k6zuotvpfm4o5tc)
+### Production Environment (App ID: `your-production-logto-app-id`)
 
 1. **Redirect URIs** (already configured):
-   - `https://xisper.hawkeye-xb.com/callback`
+   - `https://<YOUR_ADMIN_DOMAIN>/callback`
 
 2. **Post Sign-out Redirect URIs** (MUST be configured):
-   - `https://xisper.hawkeye-xb.com/`
+   - `https://<YOUR_ADMIN_DOMAIN>/`
 
 ## Why These Changes Are Needed
 
@@ -38,6 +38,9 @@ When a user logs in with one account (e.g., non-admin), then tries to log in wit
    - Add post-logout redirect URIs in Logto Cloud console
    - Navigate to: Applications → [Your App] → Settings → Post Sign-out Redirect URIs
    - Add the URLs listed above
+
+Set `VITE_API_BASE_URL` to the self-hosted Services Worker URL when building the
+admin application. It defaults to `http://localhost:8787` for local development.
 
 ## Testing
 

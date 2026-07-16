@@ -76,6 +76,7 @@ type Bindings = {
   CREEM_API_KEY: string;
   PAYMENT_WEBHOOK_SECRET?: string;
   ENVIRONMENT: string;
+  ALLOWED_ORIGINS?: string;
   DOUBAO_APP_ID?: string;
   DOUBAO_ACCESS_TOKEN?: string;
   DOUBAO_RESOURCE_ID?: string;

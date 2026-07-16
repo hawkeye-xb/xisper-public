@@ -99,8 +99,6 @@ struct SettingRow: View {
 
 private struct PreferencesCard: View {
     @AppStorage("AppleInterfaceStyle") private var interfaceStyle: String?
-    @State private var analyticsOptedOut = Analytics.isOptedOut
-
     private var config: ConfigStore { ConfigStore.shared }
     private var translateSettings: TranslateSettings { TranslateSettings.shared }
 
@@ -232,25 +230,6 @@ private struct PreferencesCard: View {
             }
             .padding(.vertical, 8)
 
-            CardDivider()
-
-            // Anonymous analytics (privacy opt-out). We never collect transcript
-            // content, audio, or clipboard text — only anonymous usage counts to
-            // improve the app. Users can turn this off entirely.
-            HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Share Anonymous Usage Data", comment: ""), description: NSLocalizedString("Help improve Xisper by sending anonymous usage statistics. Never includes your transcriptions, audio, or clipboard.", comment: ""))
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { !analyticsOptedOut },
-                    set: { enabled in
-                        analyticsOptedOut = !enabled
-                        Analytics.setOptOut(!enabled)
-                    }
-                ))
-                .toggleStyle(.switch)
-                .labelsHidden()
-            }
-            .padding(.vertical, 8)
         }
     }
 

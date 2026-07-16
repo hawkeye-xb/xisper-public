@@ -16,7 +16,8 @@
     "db:init": "wrangler d1 execute ai-services-db-dev --file=./database/schema.sql",
     "db:init:prod": "wrangler d1 execute ai-services-db-prod --env production --remote --file=./database/schema.sql",
     "db:query": "wrangler d1 execute ai-services-db-dev",
-    "check": "wrangler deployments list"
+    "check": "wrangler deployments list",
+    "check-types": "tsc --noEmit"
   },
   "keywords": [
     "cloudflare-workers",

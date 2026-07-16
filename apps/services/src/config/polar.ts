@@ -17,9 +17,9 @@ export const POLAR_CONFIG = {
  *
  * Format: UUID (e.g., 860d52db-50c3-484b-9122-df51a559b439)
  */
-export const POLAR_PRODUCTS = {
-  pro_monthly: '769294e3-8d72-46df-a405-5a7bf22ff00a',
-} as const;
+export function getPolarProducts(env: { POLAR_PRODUCT_PRO_MONTHLY?: string }) {
+  return { pro_monthly: env.POLAR_PRODUCT_PRO_MONTHLY };
+}
 
 /**
  * Map Polar subscription status to internal tier.

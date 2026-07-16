@@ -9,6 +9,7 @@
     "build": "vite-ssg build",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
+    "check-types": "vue-tsc --build",
     "deploy": "pnpm run build && wrangler pages deploy dist --project-name xisper-landing"
   },
   "dependencies": {

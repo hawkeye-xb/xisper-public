@@ -4,10 +4,10 @@
 
 ### Plans
 
-| Plan | Price | Billing Period | Creem Product ID (Sandbox) | Creem Product ID (Prod) |
-|------|-------|----------------|---------------------------|------------------------|
-| Pro Monthly | $9.99/mo | every-month | `prod_39f6MsqasslsJVAkjX4Bjq` | `prod_6hAeBM1s9mjR0GtvFC7n4j` |
-| Pro Yearly | $79.99/yr | every-year | `prod_4cIajPNIbxIM550j4MBOgk` | TODO |
+| Plan | Price | Billing Period | Environment variable |
+|------|-------|----------------|----------------------|
+| Pro Monthly | Operator-defined | every-month | `CREEM_PRODUCT_PRO_MONTHLY` |
+| Pro Yearly | Operator-defined | every-year | `CREEM_PRODUCT_PRO_YEARLY` |
 
 ### Supported Operations
 
