@@ -166,7 +166,7 @@ final class AuthManager {
             authLog("login() — FAILED to build authURL")
             throw AuthError.invalidCallback
         }
-        authLog("login() — opening browser: \(authURL.absoluteString)")
+        authLog("login() — opening authorization browser")
 
         await MainActor.run { _ = NSWorkspace.shared.open(authURL) }
 
@@ -174,7 +174,7 @@ final class AuthManager {
         let callbackURL: URL = try await withCheckedThrowingContinuation { continuation in
             pendingContinuation = continuation
         }
-        authLog("login() — got callback: \(callbackURL.absoluteString)")
+        authLog("login() — received OAuth callback")
 
         guard let cbComps  = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
               let code      = cbComps.queryItems?.first(where: { $0.name == "code" })?.value,
@@ -185,13 +185,13 @@ final class AuthManager {
             throw AuthError.invalidCallback
         }
 
-        authLog("login() — code=\(code.prefix(8))... state OK, exchanging token directly with Logto...")
+        authLog("login() — state OK, exchanging authorization code")
         pendingState = nil
         try await exchangeToken(code: code, verifier: verifier)
     }
 
     func handleAuthCallback(url: URL) {
-        authLog("handleAuthCallback() — url=\(url.absoluteString) hasContinuation=\(pendingContinuation != nil)")
+        authLog("handleAuthCallback() — hasContinuation=\(pendingContinuation != nil)")
         pendingContinuation?.resume(returning: url)
         pendingContinuation = nil
     }
@@ -271,8 +271,7 @@ final class AuthManager {
 
         let (data, httpResp) = try await URLSession.shared.data(for: req)
         let statusCode = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
-        let bodyPreview = String(data: data.prefix(500), encoding: .utf8) ?? "<binary>"
-        authLog("exchangeToken() — HTTP \(statusCode), body=\(bodyPreview)")
+        authLog("exchangeToken() — HTTP \(statusCode)")
 
         guard statusCode == 200 else {
             authLog("exchangeToken() — FAILED: HTTP \(statusCode)")
@@ -317,7 +316,7 @@ final class AuthManager {
             await MainActor.run { isAuthenticated = false }
             throw AuthError.notAuthenticated
         }
-        authLog("refresh() — using refreshTokenPrefix=\(String(rt.prefix(8)))...")
+        authLog("refresh() — using stored refresh token")
 
         let url = "\(Self.logtoEndpoint)/oidc/token"
         var req = URLRequest(url: URL(string: url)!)
@@ -335,11 +334,7 @@ final class AuthManager {
         let statusCode = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
 
         guard statusCode == 200 else {
-            let respBody = String(data: data.prefix(500), encoding: .utf8) ?? "<binary>"
-            authLog("refresh() — FAILED: HTTP \(statusCode), body=\(respBody)")
-            if let rtk = rt.prefix(8).description as String? {
-                authLog("refresh() — used refreshTokenPrefix=\(rtk)...")
-            }
+            authLog("refresh() — FAILED: HTTP \(statusCode)")
             await MainActor.run {
                 isAuthenticated = false
                 // Clear stale tokens so next cold start doesn't loop on expired credentials
@@ -470,7 +465,7 @@ final class AuthManager {
         authLog("  tokenExpiry=\(allTokens["token_expiry"] ?? "nil")")
         authLog("  email=\(allTokens["email"] ?? "nil")")
         if let rtk = allTokens["refresh_token"], rtk.count > 8 {
-            authLog("  refreshTokenPrefix=\(String(rtk.prefix(8)))...")
+            authLog("  hasRefreshToken=\(!rtk.isEmpty)")
         }
 
         let hasToken = allTokens["access_token"]
