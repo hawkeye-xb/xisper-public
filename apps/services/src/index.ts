@@ -70,6 +70,7 @@ type Bindings = {
   LOGTO_APP_ID?: string;
   LOGTO_APP_SECRET?: string;
   SERVICE_BASE_URL?: string;
+  ALLOWED_ORIGINS?: string;
   OPENAI_API_KEY?: string;
   DEEPSEEK_API_KEY?: string;
   CREEM_API_KEY: string;
@@ -95,17 +96,42 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 // Global middlewares
 app.use('*', logger());
-app.use('*', cors({
-  origin: (origin) => {
-    // Allow localhost in development
-    if (origin?.includes('localhost')) return origin;
-    // Allow specific production domains if needed
-    return origin;
-  },
-  credentials: true, // Enable cookies and credentials
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use('*', async (c, next) => {
+  const environment = c.env.ENVIRONMENT || 'development';
+  const configuredOrigins = (c.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const corsMiddleware = cors({
+    origin: (origin) => {
+      if (!origin) return '';
+      if (
+        environment === 'development' &&
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        return origin;
+      }
+      return configuredOrigins.includes(origin) ? origin : '';
+    },
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Admin-Setup-Secret'],
+  });
+
+  return corsMiddleware(c, next);
+});
+
+// Demo endpoints are development-only and still require a valid user token.
+app.use('/api/v1/demo/*', async (c, next) => {
+  if ((c.env.ENVIRONMENT || 'development') !== 'development') {
+    return c.json({ error: 'Not Found' }, 404);
+  }
+  return authMiddleware(c, next);
+});
+
+// The status route previously decoded JWT payloads without verifying their signature.
+app.use('/api/v1/rate-limit/status', authMiddleware);
 
 // WebSocket handler (must be before other routes)
 app.use('/api/v1/asr/proxy', async (c, next) => {

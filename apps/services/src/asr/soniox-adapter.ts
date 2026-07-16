@@ -126,13 +126,13 @@ export class SonioxAdapter implements ASRProviderAdapter {
     // Diagnostic: raw message preview — needed to verify Soniox protocol observation
     // (e.g. whether `finished:true` is actually sent before close, or replaced by `error_code`).
     // Truncated to 800 chars; remove once Soniox close-without-finished root cause is confirmed.
-    console.log(`[Soniox] raw msg (len=${data.length}): ${data.substring(0, 800)}`);
+    console.log(`[Soniox] text frame received (len=${data.length})`);
 
     let msg: any;
     try {
       msg = JSON.parse(data);
     } catch {
-      console.warn('[Soniox] Non-JSON text frame:', data.substring(0, 200));
+      console.warn(`[Soniox] Non-JSON text frame (len=${data.length})`);
       return null;
     }
 

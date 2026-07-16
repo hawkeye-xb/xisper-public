@@ -99,7 +99,7 @@ bucket_name = "xisper-releases"
 # Beta environment (reuses dev resources)
 # ============================================
 [env.beta]
-vars = { ENVIRONMENT = "beta", SERVICE_BASE_URL = "https://<YOUR_BETA_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+vars = { ENVIRONMENT = "beta", SERVICE_BASE_URL = "https://<YOUR_BETA_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/", ALLOWED_ORIGINS = "https://<YOUR_BETA_APP_DOMAIN>,https://<YOUR_BETA_ADMIN_DOMAIN>" }
 # DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env beta`
 # SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env beta`
 routes = [
@@ -140,7 +140,7 @@ bucket_name = "xisper-releases"
 # Production environment
 # ============================================
 [env.production]
-vars = { ENVIRONMENT = "production", SERVICE_BASE_URL = "https://<YOUR_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/" }
+vars = { ENVIRONMENT = "production", SERVICE_BASE_URL = "https://<YOUR_DOMAIN>", ASR_MODEL = "qwen3-asr-flash-realtime", LOGTO_ENDPOINT = "https://<YOUR_LOGTO_TENANT>.logto.app/", ALLOWED_ORIGINS = "https://<YOUR_APP_DOMAIN>,https://<YOUR_ADMIN_DOMAIN>" }
 # DEEPSEEK_API_KEY: Set via `wrangler secret put DEEPSEEK_API_KEY --env production`
 # SONIOX_API_KEY: Set via `wrangler secret put SONIOX_API_KEY --env production`
 routes = [

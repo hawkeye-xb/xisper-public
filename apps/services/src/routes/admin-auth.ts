@@ -6,9 +6,24 @@ import { adminAuthMiddleware } from '../middlewares/adminAuth';
 type Bindings = {
   DB: D1Database;
   ADMIN_JWT_SECRET: string;
+  ADMIN_SETUP_SECRET?: string;
 };
 
 const adminAuth = new Hono<{ Bindings: Bindings }>();
+
+function constantTimeEqual(left: string, right: string): boolean {
+  const encoder = new TextEncoder();
+  const leftBytes = encoder.encode(left);
+  const rightBytes = encoder.encode(right);
+  const length = Math.max(leftBytes.length, rightBytes.length);
+  let mismatch = leftBytes.length ^ rightBytes.length;
+
+  for (let index = 0; index < length; index++) {
+    mismatch |= (leftBytes[index] ?? 0) ^ (rightBytes[index] ?? 0);
+  }
+
+  return mismatch === 0;
+}
 
 /**
  * POST /login — Admin username/password login
@@ -59,6 +74,17 @@ adminAuth.post('/login', async (c) => {
  * Only works when admin_accounts table is empty (first-time setup).
  */
 adminAuth.post('/setup', async (c) => {
+  const configuredSecret = c.env.ADMIN_SETUP_SECRET;
+  if (!configuredSecret) {
+    console.error('[Admin Setup] ADMIN_SETUP_SECRET is not configured');
+    return c.json({ success: false, error: 'Admin setup is not configured' }, 503);
+  }
+
+  const suppliedSecret = c.req.header('X-Admin-Setup-Secret');
+  if (!suppliedSecret || !constantTimeEqual(suppliedSecret, configuredSecret)) {
+    return c.json({ success: false, error: 'Invalid setup credentials' }, 401);
+  }
+
   const count = await c.env.DB.prepare(
     'SELECT COUNT(*) as cnt FROM admin_accounts'
   ).first<{ cnt: number }>();
