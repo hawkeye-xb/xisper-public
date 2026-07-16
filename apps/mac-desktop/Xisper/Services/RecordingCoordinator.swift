@@ -589,7 +589,7 @@ final class RecordingCoordinator {
         recLog("stopSession() — state=finalizing, waiting for ASR final...")
 
         capturedContext = collectContext()
-        recLog("stopSession() — context captured: app=\(capturedContext?.appName ?? "nil"), selectedText=\(capturedContext?.selectedText?.prefix(40) ?? "nil")")
+        recLog("stopSession() — context captured: app=\(capturedContext?.appName ?? "nil"), hasSelectedText=\(capturedContext?.selectedText?.isEmpty == false)")
 
         // Dynamic final timeout: short recordings need 15s base; longer recordings
         // (and especially ones that hit a mid-recording reconnect + replay) need
@@ -599,7 +599,7 @@ final class RecordingCoordinator {
 
         do {
             let text = try await client.waitForFinal(timeout: finalTimeout)
-            recLog("stopSession() — ASR final text=\(text.prefix(100))")
+            recLog("stopSession() — ASR final received, length=\(text.count)")
 
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 let zeroResults = client.isLastResultLikelyServiceError
@@ -661,7 +661,7 @@ final class RecordingCoordinator {
                 config: ConfigStore.shared,
                 recordingId: currentRecordingId
             )
-            recLog("attemptPostRecordingRetranscribe() — success: \(text.prefix(100))")
+            recLog("attemptPostRecordingRetranscribe() — success, length=\(text.count)")
 
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 recLog("attemptPostRecordingRetranscribe() — empty text")
@@ -857,7 +857,7 @@ final class RecordingCoordinator {
         state = .committing
         let actionId = currentActionId ?? "dictation"
         let isTranslateMode = actionId == "translate"
-        recLog("commitResult() — state=committing, actionId=\(actionId), currentActionId=\(currentActionId ?? "nil"), rawText=\(text.prefix(80))")
+        recLog("commitResult() — state=committing, actionId=\(actionId), currentActionId=\(currentActionId ?? "nil"), rawTextLength=\(text.count)")
         CrashLogger.log("RecordingCoordinator", "commitResult START — actionId=\(actionId) isTranslateMode=\(isTranslateMode)")
 
         let recordingDuration = recordingEnd.timeIntervalSince(start)
@@ -911,7 +911,7 @@ final class RecordingCoordinator {
                 currentLLMTask = llmTask
                 do {
                     finalText = try await llmTask.value
-                    recLog("commitResult() — LLM translation done: \(finalText.prefix(80))")
+                    recLog("commitResult() — LLM translation done, length=\(finalText.count)")
                 } catch {
                     recLog("commitResult() — LLM translation failed/timeout: \(error), using ITN text")
                     finalText = itnText
@@ -946,7 +946,7 @@ final class RecordingCoordinator {
                 currentLLMTask = llmTask
                 do {
                     finalText = try await llmTask.value
-                    recLog("commitResult() — LLM postprocess done: \(finalText.prefix(80))")
+                    recLog("commitResult() — LLM postprocess done, length=\(finalText.count)")
                 } catch {
                     recLog("commitResult() — LLM postprocess failed/timeout: \(error), using ITN text")
                     finalText = itnText
@@ -1002,7 +1002,7 @@ final class RecordingCoordinator {
         // Inject final text into the focused app
         var didAutoWrite = false
         if !finalText.isEmpty {
-            recLog("commitResult() — injecting text: \(finalText.prefix(80))")
+            recLog("commitResult() — injecting text, length=\(finalText.count)")
             let useAutoEnter = triggerSource == .headphone && ConfigStore.shared.autoEnterAfterPaste
             let result = useAutoEnter
                 ? await InputWriter.writeAndPressEnter(finalText)
