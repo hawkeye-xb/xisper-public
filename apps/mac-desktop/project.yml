@@ -45,10 +45,14 @@ targets:
         # Beta vs Release bundle ID is overridden at build via:
         #   xcodebuild ... PRODUCT_BUNDLE_IDENTIFIER=xyz.hawkeye-xb.xisper-mac.beta
         PRODUCT_BUNDLE_IDENTIFIER: xyz.hawkeye-xb.xisper-mac
+        XISPER_SERVICE_BASE_URL: http://localhost:8787
+        XISPER_LOGTO_ENDPOINT: https://your-tenant.logto.app
+        XISPER_LOGTO_APP_ID: your-logto-app-id
+        XISPER_APPCAST_URL: http://localhost:8787/api/v1/app/mac/updates/feed/beta
+        SPARKLE_PUBLIC_ED_KEY: ""
       configs:
         Debug:
           CODE_SIGN_STYLE: Automatic
-          DEVELOPMENT_TEAM: 2WJUWVUJBN
           DEBUG_INFORMATION_FORMAT: dwarf
           SWIFT_OPTIMIZATION_LEVEL: "-Onone"
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
@@ -58,10 +62,7 @@ targets:
           INFOPLIST_KEY_CFBundleDisplayName: "Xisper (Beta)"
           XISPER_URL_SCHEME: xisper-mac-beta
         Release:
-          CODE_SIGN_STYLE: Manual
-          CODE_SIGN_IDENTITY: "Developer ID Application: Zhaowen Li (2WJUWVUJBN)"
-          DEVELOPMENT_TEAM: 2WJUWVUJBN
-          PROVISIONING_PROFILE_SPECIFIER: ""
+          CODE_SIGN_STYLE: Automatic
           DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
           SWIFT_OPTIMIZATION_LEVEL: "-O"
           STRIP_SWIFT_SYMBOLS: YES

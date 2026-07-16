@@ -176,13 +176,13 @@ After CI completes, download and test the build from R2:
 
 ```bash
 # R2 public base URL
-# https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev
+# https://releases.example.com
 
 # Beta DMG download
-open "https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev/beta/Xisper-0.1.8-beta-arm64.dmg"
+open "https://releases.example.com/beta/Xisper-0.1.8-beta-arm64.dmg"
 
 # Check manifest content
-curl "https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev/beta/latest-mac.yml"
+curl "https://releases.example.com/beta/latest-mac.yml"
 ```
 
 Verification checklist:
@@ -240,8 +240,8 @@ After rollout is complete or if issues are found:
 |--------|---------|
 | Trigger beta build | `git tag desktop-v*.*.*-beta && git push origin --tags` |
 | Trigger prod build | `git tag desktop-v*.*.* && git push origin --tags` |
-| Download beta DMG | `https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev/beta/{filename}.dmg` |
-| Check manifest | `curl https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev/beta/latest-mac.yml` |
+| Download beta DMG | `https://releases.example.com/beta/{filename}.dmg` |
+| Check manifest | `curl https://releases.example.com/beta/latest-mac.yml` |
 | Enable update | `./scripts/cf-toggle-update.sh beta true false` |
 | Force update | `./scripts/cf-toggle-update.sh beta true true` |
 | Disable update | `./scripts/cf-toggle-update.sh beta false` |
@@ -252,7 +252,7 @@ After rollout is complete or if issues are found:
 The backend Worker needs `R2_PUBLIC_URL` set correctly for file URL rewriting:
 
 ```
-R2_PUBLIC_URL=https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev
+R2_PUBLIC_URL=https://releases.example.com
 ```
 
 Set via `wrangler secret put R2_PUBLIC_URL` or in `.dev.vars` for local development.

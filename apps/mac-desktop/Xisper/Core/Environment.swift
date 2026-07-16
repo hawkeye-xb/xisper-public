@@ -2,6 +2,12 @@ import Foundation
 
 /// Centralized environment configuration derived from build configuration and bundle ID.
 enum AppEnvironment {
+    private static func configuration(_ key: String, fallback: String) -> String {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,
+              !value.isEmpty,
+              !value.hasPrefix("$(") else { return fallback }
+        return value
+    }
 
     /// Whether this build targets the dev backend.
     /// DEBUG builds always use dev; Release builds use dev only for `.beta` bundle IDs.
@@ -22,20 +28,18 @@ enum AppEnvironment {
 
     /// Base URL for all backend API calls.
     static var serviceBaseURL: String {
-        isDevBackend
-            ? "https://xisper-dev.hawkeye-xb.com"
-            : "https://xisper.hawkeye-xb.com"
+        configuration("XisperServiceBaseURL", fallback: "http://localhost:8787")
     }
 
     /// Logto OAuth app ID.
     static var logtoAppId: String {
-        isDevBackend
-            ? "2mepw39zb3jt55dnht427"
-            : "vnd5x8k6zuotvpfm4o5tc"
+        configuration("XisperLogtoAppID", fallback: "")
     }
 
     /// Logto OIDC endpoint.
-    static let logtoEndpoint = "https://fn2daz.logto.app"
+    static var logtoEndpoint: String {
+        configuration("XisperLogtoEndpoint", fallback: "https://your-tenant.logto.app")
+    }
 
     /// OAuth callback URL scheme.
     /// Beta uses a separate scheme to prevent callback conflicts between environments.
@@ -98,8 +102,9 @@ enum AppEnvironment {
 
     /// Sparkle appcast feed URL.
     static var appcastURL: String {
-        isDevBackend
-            ? "https://xisper-dev.hawkeye-xb.com/api/v1/app/mac/updates/feed/beta"
-            : "https://xisper.hawkeye-xb.com/api/v1/app/mac/updates/feed/production"
+        configuration(
+            "XisperAppcastURL",
+            fallback: "\(serviceBaseURL)/api/v1/app/mac/updates/feed/\(environmentName)"
+        )
     }
 }

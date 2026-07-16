@@ -6,3 +6,6 @@ ALIBABA_API_KEY=your-alibaba-dashscope-api-key
 GROQ_API_KEY=gsk_your-groq-api-key
 GEMINI_API_KEY=your-gemini-api-key
 DEEPSEEK_API_KEY=your-deepseek-api-key
+
+# Browser origins allowed to call the Worker directly, comma separated.
+ALLOWED_ORIGINS=http://localhost:5173

@@ -6,10 +6,10 @@
 # Logto 认证配置
 # ============================================
 # Logto 端点（从 Logto 控制台获取）
-LOGTO_ENDPOINT=https://fn2daz.logto.app
+LOGTO_ENDPOINT=https://your-tenant.logto.app
 
 # Logto 应用 ID（本地开发通常用 beta/xisper-dev）
-LOGTO_APP_ID=2mepw39zb3jt55dnht427
+LOGTO_APP_ID=your-logto-app-id
 
 # Logto App Secret（SPA 模式通常不需要，后端验证 token 不需要）
 # 如果使用 Machine-to-Machine 或后端直接调用，才需要填写
@@ -18,9 +18,6 @@ LOGTO_APP_SECRET=
 # Browser origins allowed to send credentialed API requests.
 # Local development automatically allows localhost and 127.0.0.1.
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
-
-# Secret required only when creating the first administrator account.
-ADMIN_SETUP_SECRET=replace-with-a-long-random-secret
 
 # ============================================
 # AI API 密钥
@@ -37,19 +34,27 @@ DEEPSEEK_API_KEY=your-deepseek-api-key
 # Creem API Key（从 Dashboard → Settings → API Keys 获取）
 # Test mode: creem_test_xxx, Live mode: creem_xxx
 CREEM_API_KEY=creem_test_your-api-key
+CREEM_PRODUCT_PRO_MONTHLY=your-creem-monthly-product-id
+CREEM_PRODUCT_PRO_YEARLY=your-creem-yearly-product-id
 
 # Creem Webhook 密钥（从 Dashboard → Settings → Webhooks 获取）
 PAYMENT_WEBHOOK_SECRET=your-webhook-secret
 
+# Independent admin authentication. Use long random values.
+ADMIN_JWT_SECRET=replace-with-at-least-32-random-bytes
+# Required only for POST /api/v1/admin-auth/setup. Remove after bootstrap.
+ADMIN_SETUP_SECRET=replace-with-a-one-time-random-secret
+
 # ============================================
 # Polar 支付平台 (https://polar.sh)
 # ============================================
-# 支付提供商选择：'creem' 或 'polar' 或 'paddle'
-# 默认使用 Creem，切换时设置为对应的 provider 名称
+# 支付提供商选择。Creem 是默认实现；Paddle 需要配置 API、价格和 webhook。
+# Polar 保留适配器接口，但 webhook 在完成验签前保持关闭。
 PAYMENT_PROVIDER=creem
 
 # Polar API Token（从 Dashboard → Settings → API 获取）
 POLAR_ACCESS_TOKEN=your-polar-access-token
+POLAR_PRODUCT_PRO_MONTHLY=your-polar-monthly-product-id
 
 # Polar Webhook 密钥（从 Dashboard → Webhooks 获取）
 POLAR_WEBHOOK_SECRET=your-polar-webhook-secret
@@ -62,6 +67,7 @@ POLAR_SERVER=sandbox
 # ============================================
 # Paddle API Key（从 Developer Tools → Authentication 获取）
 PADDLE_ACCESS_TOKEN=your-paddle-api-key
+PADDLE_PRICE_PRO_MONTHLY=your-paddle-monthly-price-id
 
 # Paddle Vendor ID（通过 KYC 后获取）
 PADDLE_VENDOR_ID=your-vendor-id
@@ -108,7 +114,10 @@ R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
 R2_BUCKET_NAME=xisper-releases
 
 # R2 公开访问 URL（r2.dev 公开地址或自定义域名）
-R2_PUBLIC_URL=https://pub-8d0b4c0438504982bd50075e051cceb1.r2.dev
+R2_PUBLIC_URL=https://releases.example.com
+
+# Browser origins allowed to call the API, comma separated.
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173
 
 # ============================================
 # 注意事项

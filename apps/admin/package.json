@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
+    "check-types": "vue-tsc --build",
     "deploy": "vite build && wrangler pages deploy dist",
     "build:beta": "vite build --mode beta",
     "build:prod": "vite build --mode production",

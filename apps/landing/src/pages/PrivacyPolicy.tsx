@@ -55,11 +55,10 @@ export default defineComponent({
           <Section title="2. Information We Do NOT Collect">
             <Subsection title="Audio Data">
               <p>
-                Your audio recordings are processed entirely on your device and streamed
-                directly to our speech recognition (ASR) service via our API relay.
-                We do not store, retain, or access your original audio files at any point.
-                Audio data is processed in real-time and discarded immediately after
-                transcription.
+                Audio is captured on your device and streamed through the configured API relay
+                to the speech-recognition provider selected by the service operator. Xisper's
+                backend does not intentionally persist live audio. Provider processing and
+                retention are governed by the selected provider's terms.
               </p>
             </Subsection>
             <Subsection title="Transcription Content">
@@ -123,10 +122,10 @@ export default defineComponent({
               <li>
                 <strong class="text-text-primary">AI Processing Services</strong>: When you
                 use AI-powered post-processing features (such as summarization and formatting),
-                your text is sent to Alibaba Cloud Qwen services. These services include
-                built-in content safety mechanisms that automatically filter inappropriate
-                content (sensitive keywords, NSFW content, PII, etc.). The AI service provider
-                processes your text in real-time and does not retain it.
+                your text is sent to one of the AI providers configured by the service operator.
+                The open-source gateway supports multiple providers and may use a fallback when
+                the preferred provider is unavailable. Provider processing and retention are
+                governed by the selected provider's terms and configuration.
               </li>
               <li>
                 <strong class="text-text-primary">Legal Requirements</strong>: We may

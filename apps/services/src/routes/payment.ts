@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { Checkout, CustomerPortal, Webhooks } from '@polar-sh/hono';
 import { authMiddleware } from '../middlewares/auth';
 import { resolveUserTier } from '../utils/subscription';
 import { reconcileSubscription } from '../utils/reconcile';
@@ -24,40 +23,13 @@ type Bindings = {
   PAYMENT_PROVIDER?: string;
   POLAR_SERVER?: string;
   PADDLE_SERVER?: string;
+  CREEM_PRODUCT_PRO_MONTHLY?: string;
+  CREEM_PRODUCT_PRO_YEARLY?: string;
+  POLAR_PRODUCT_PRO_MONTHLY?: string;
+  PADDLE_PRICE_PRO_MONTHLY?: string;
 };
 
 const payment = new Hono<{ Bindings: Bindings }>();
-
-// ============================================
-// Polar Checkout - Official SDK Implementation
-// Docs: https://polar.sh/docs/integrate/sdk/adapters/hono
-// ============================================
-payment.get(
-  '/polar/checkout',
-  Checkout({
-    accessToken: 'POLAR_ACCESS_TOKEN', // Uses env var automatically
-    successUrl: 'https://xisper-dev.hawkeye-xb.com/api/v1/payment/success',
-    returnUrl: 'https://xisper-dev.hawkeye-xb.com',
-    server: 'sandbox',
-    theme: 'dark',
-  })
-);
-
-// ============================================
-// Polar Customer Portal - Official SDK Implementation
-// ============================================
-payment.get(
-  '/polar/portal',
-  CustomerPortal({
-    accessToken: 'POLAR_ACCESS_TOKEN',
-    getCustomerId: (c) => {
-      // Get customer ID from subscription
-      return '';
-    },
-    returnUrl: 'https://xisper-dev.hawkeye-xb.com',
-    server: 'sandbox',
-  })
-);
 
 // ============================================
 // POST /checkout/create — Create checkout (redirects to Polar)
@@ -86,6 +58,9 @@ payment.post('/checkout/create', authMiddleware, async (c) => {
   // If using Polar, redirect to Polar checkout page
   if (provider.source === 'polar') {
     try {
+      if (!c.env.POLAR_PRODUCT_PRO_MONTHLY) {
+        return c.json({ success: false, error: 'Polar product is not configured' }, 503);
+      }
       // Call Polar API directly to create checkout
       const polarApiBase = 'https://api.polar.sh/v1';
       const polarResponse = await fetch(`${polarApiBase}/checkouts`, {
@@ -95,8 +70,8 @@ payment.post('/checkout/create', authMiddleware, async (c) => {
           'Authorization': `Bearer ${c.env.POLAR_ACCESS_TOKEN}`,
         },
         body: JSON.stringify({
-          product_id: '769294e3-8d72-46df-a405-5a7bf22ff00a',
-          success_url: 'https://xisper-dev.hawkeye-xb.com/api/v1/payment/success',
+          product_id: c.env.POLAR_PRODUCT_PRO_MONTHLY,
+          success_url: `${c.env.SERVICE_BASE_URL || 'http://localhost:8787'}/api/v1/payment/success`,
           metadata: { user_id: userId, email: userEmail || '' },
         }),
       });
@@ -120,6 +95,10 @@ payment.post('/checkout/create', authMiddleware, async (c) => {
   // If using Paddle, create transaction then return our checkout page URL (embeds Paddle.js)
   if (provider.source === 'paddle') {
     try {
+      const paddlePriceId = getPaddleProducts(c.env).pro_monthly;
+      if (!paddlePriceId) {
+        return c.json({ success: false, error: 'Paddle price is not configured' }, 503);
+      }
       const paddleApiBase = getPaddleApiBase(c.env.ENVIRONMENT || 'development');
       const paddleResponse = await fetch(`${paddleApiBase}/transactions`, {
         method: 'POST',
@@ -128,7 +107,7 @@ payment.post('/checkout/create', authMiddleware, async (c) => {
           'Authorization': `Bearer ${c.env.PADDLE_ACCESS_TOKEN}`,
         },
         body: JSON.stringify({
-          items: [{ price_id: getPaddleProducts(c.env.ENVIRONMENT || 'development').pro_monthly, quantity: 1 }],
+          items: [{ price_id: paddlePriceId, quantity: 1 }],
           custom_data: { user_id: userId, email: userEmail || '' },
         }),
       });
@@ -157,7 +136,7 @@ payment.post('/checkout/create', authMiddleware, async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const productKey = (body.product as string) || 'pro_monthly';
 
-  const serviceBase = c.env.SERVICE_BASE_URL || 'https://xisper-dev.hawkeye-xb.com';
+  const serviceBase = c.env.SERVICE_BASE_URL || 'http://localhost:8787';
   const successUrl = `${serviceBase}/api/v1/payment/success`;
 
   try {
@@ -188,7 +167,7 @@ payment.get('/paddle/checkout', async (c) => {
   const env = c.env.ENVIRONMENT || 'development';
   const isSandbox = env !== 'production';
   const clientToken = c.env.PADDLE_CLIENT_TOKEN || '';
-  const serviceBase = c.env.SERVICE_BASE_URL || 'https://xisper-dev.hawkeye-xb.com';
+  const serviceBase = c.env.SERVICE_BASE_URL || 'http://localhost:8787';
   const successUrl = `${serviceBase}/api/v1/payment/success`;
   const paddleJs = isSandbox
     ? 'https://sandbox-cdn.paddle.com/paddle/v2/paddle.js'
@@ -367,7 +346,7 @@ payment.get('/pricing', async (c) => {
   const isSubscribed = currentTier !== 'free';
 
   const env = c.env.ENVIRONMENT || 'development';
-  const serviceBase = c.env.SERVICE_BASE_URL || 'https://xisper-dev.hawkeye-xb.com';
+  const serviceBase = c.env.SERVICE_BASE_URL || 'http://localhost:8787';
   const scheme = env === 'production' ? 'xisper-mac' : 'xisper-mac-beta';
   const base = `${serviceBase}/api/v1`;
 
@@ -515,7 +494,7 @@ payment.get('/pricing/checkout', async (c) => {
   }
 
   const provider = getProvider(c);
-  const serviceBase = c.env.SERVICE_BASE_URL || 'https://xisper-dev.hawkeye-xb.com';
+  const serviceBase = c.env.SERVICE_BASE_URL || 'http://localhost:8787';
   const successUrl = `${serviceBase}/api/v1/payment/success`;
 
   try {
@@ -818,6 +797,11 @@ function getProvider(c: any): PaymentProvider {
     POLAR_ACCESS_TOKEN: c.env.POLAR_ACCESS_TOKEN,
     PADDLE_ACCESS_TOKEN: c.env.PADDLE_ACCESS_TOKEN,
     PADDLE_VENDOR_ID: c.env.PADDLE_VENDOR_ID,
+    CREEM_PRODUCT_PRO_MONTHLY: c.env.CREEM_PRODUCT_PRO_MONTHLY,
+    CREEM_PRODUCT_PRO_YEARLY: c.env.CREEM_PRODUCT_PRO_YEARLY,
+    POLAR_PRODUCT_PRO_MONTHLY: c.env.POLAR_PRODUCT_PRO_MONTHLY,
+    PADDLE_PRICE_PRO_MONTHLY: c.env.PADDLE_PRICE_PRO_MONTHLY,
+    POLAR_SERVER: c.env.POLAR_SERVER,
     ENVIRONMENT: c.env.ENVIRONMENT,
   });
 }

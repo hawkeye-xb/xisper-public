@@ -39,7 +39,7 @@ new_sqlite_classes = ["AIAgent"]
 # Development environment
 # ============================================
 [env.development]
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", ALLOWED_ORIGINS = "http://localhost:5173" }
 
 [env.development.ai]
 binding = "AI"
@@ -58,7 +58,7 @@ database_id = "<D1_DATABASE_ID_DEV>"
 # Beta environment
 # ============================================
 [env.beta]
-vars = { ENVIRONMENT = "beta" }
+vars = { ENVIRONMENT = "beta", ALLOWED_ORIGINS = "https://<YOUR_APP_DOMAIN>" }
 
 [env.beta.ai]
 binding = "AI"
@@ -79,7 +79,7 @@ bindings = [{ name = "AI_AGENT", class_name = "AIAgent" }]
 # Production environment
 # ============================================
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", ALLOWED_ORIGINS = "https://<YOUR_APP_DOMAIN>" }
 
 [env.production.ai]
 binding = "AI"

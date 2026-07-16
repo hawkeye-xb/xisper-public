@@ -25,12 +25,25 @@ export type Env = {
   GEMINI_API_KEY?: string
   DEEPSEEK_API_KEY?: string
   ENVIRONMENT: string
+  ALLOWED_ORIGINS?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
 app.use('*', logger())
-app.use('*', cors())
+app.use('*', async (c, next) => {
+  const allowedOrigins = new Set(
+    (c.env.ALLOWED_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean),
+  )
+  const isDevelopment = !c.env.ENVIRONMENT || c.env.ENVIRONMENT === 'development'
+  return cors({
+    origin: origin => {
+      if (allowedOrigins.has(origin)) return origin
+      if (isDevelopment && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return origin
+      return ''
+    },
+  })(c, next)
+})
 
 app.get('/health', (c) => {
   return c.json({

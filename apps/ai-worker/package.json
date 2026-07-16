@@ -7,7 +7,8 @@
     "dev": "NO_PROXY='*' HTTP_PROXY='' HTTPS_PROXY='' wrangler dev --port 8788",
     "deploy": "wrangler deploy",
     "deploy:beta": "bash ../../scripts/deploy.sh ai-worker beta",
-    "deploy:prod": "bash ../../scripts/deploy.sh ai-worker production"
+    "deploy:prod": "bash ../../scripts/deploy.sh ai-worker production",
+    "check-types": "tsc --noEmit"
   },
   "keywords": [
     "cloudflare-workers",

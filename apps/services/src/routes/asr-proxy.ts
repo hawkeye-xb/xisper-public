@@ -145,9 +145,10 @@ async function handleASRProxyConnection(
   let durationTimerId: ReturnType<typeof setInterval> | null = null;
 
   // Message buffer (PCM binary frames arriving before upstream is ready).
-  // No size limit — a transparent proxy must never drop audio frames.
-  // At 32KB/s (16kHz×16bit×mono), even 60s of buffering is only ~1.9MB.
+  // Bound memory per connection so a stalled provider cannot exhaust the Worker.
+  const MAX_BUFFER_BYTES = 8 * 1024 * 1024;
   const messageBuffer: ArrayBuffer[] = [];
+  let bufferedBytes = 0;
   let isBuffering = true;
   const bufferStats = { maxSize: 0, totalBuffered: 0 };
 
@@ -265,7 +266,15 @@ async function handleASRProxyConnection(
     if (!firstAudioTime) firstAudioTime = Date.now();
 
     if (isBuffering) {
-      messageBuffer.push(event.data as ArrayBuffer);
+      const frame = event.data as ArrayBuffer;
+      if (bufferedBytes + frame.byteLength > MAX_BUFFER_BYTES) {
+        console.warn(`[ASR Proxy] Closing ${sessionId}: pre-connect audio buffer exceeded limit`);
+        clientWS.close(1009, 'Audio buffer limit exceeded');
+        sessionResolve();
+        return;
+      }
+      messageBuffer.push(frame);
+      bufferedBytes += frame.byteLength;
       bufferStats.totalBuffered++;
       if (messageBuffer.length > bufferStats.maxSize) bufferStats.maxSize = messageBuffer.length;
     } else {
@@ -329,6 +338,7 @@ async function handleASRProxyConnection(
         mergeOffset += buf.byteLength;
       }
       messageBuffer.length = 0;
+      bufferedBytes = 0;
 
       console.log(`[ASR Proxy] Retranscribe: ${totalBytes} bytes PCM, sending to ${adapter.name} async API`);
       const wavData = buildWav(merged.buffer, sessionConfig.sampleRate || 16000, 1);
@@ -466,6 +476,7 @@ async function handleASRProxyConnection(
         }
       }
       messageBuffer.length = 0;
+      bufferedBytes = 0;
     }
     isBuffering = false;
     console.log('[ASR Proxy] Switched to direct forwarding');
@@ -843,6 +854,7 @@ async function handleASRProxyConnection(
     }
 
     messageBuffer.length = 0;
+    bufferedBytes = 0;
     sessionResolve!();
   }
 
