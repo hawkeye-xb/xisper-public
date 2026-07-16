@@ -619,8 +619,8 @@ final class RecordingCoordinator {
             if let err = error as? ASRClientError, err == .connectionFailed {
                 Analytics.dictationFailed(
                     sessionId: currentRecordingId ?? "unknown",
-                    errorCode: "connection_failed",
-                    phase: "finalize"
+                    phase: "finalize",
+                    errorCode: "connection_failed"
                 )
                 asrClient?.close()
                 asrClient = nil
