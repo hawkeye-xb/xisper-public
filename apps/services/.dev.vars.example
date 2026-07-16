@@ -15,6 +15,13 @@ LOGTO_APP_ID=2mepw39zb3jt55dnht427
 # 如果使用 Machine-to-Machine 或后端直接调用，才需要填写
 LOGTO_APP_SECRET=
 
+# Browser origins allowed to send credentialed API requests.
+# Local development automatically allows localhost and 127.0.0.1.
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+
+# Secret required only when creating the first administrator account.
+ADMIN_SETUP_SECRET=replace-with-a-long-random-secret
+
 # ============================================
 # AI API 密钥
 # ============================================
