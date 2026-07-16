@@ -15,14 +15,52 @@ type Bindings = {
   PADDLE_ACCESS_TOKEN?: string;
   PADDLE_VENDOR_ID?: string;
   SERVICE_BASE_URL?: string;
+  PAYMENT_PROVIDER?: string;
 };
 
 const paddleWebhooks = new Hono<{ Bindings: Bindings }>();
+
+const WEBHOOK_TOLERANCE_SECONDS = 300;
+
+async function verifyPaddleSignature(rawBody: string, header: string, secret: string): Promise<boolean> {
+  const parts = Object.fromEntries(
+    header.split(';').map((part) => part.trim().split('=', 2))
+  );
+  const timestamp = parts.ts;
+  const expectedSignature = parts.h1;
+  if (!timestamp || !expectedSignature || !/^\d+$/.test(timestamp)) return false;
+
+  const timestampSeconds = Number(timestamp);
+  if (!Number.isSafeInteger(timestampSeconds)) return false;
+  if (Math.abs(Math.floor(Date.now() / 1000) - timestampSeconds) > WEBHOOK_TOLERANCE_SECONDS) return false;
+
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const digest = await crypto.subtle.sign(
+    'HMAC', key, new TextEncoder().encode(`${timestamp}:${rawBody}`)
+  );
+  const actualSignature = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  if (actualSignature.length !== expectedSignature.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < actualSignature.length; i++) {
+    mismatch |= actualSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
 
 // ============================================
 // POST /webhooks/paddle — Paddle webhook receiver
 // ============================================
 paddleWebhooks.post('/', async (c) => {
+  if ((c.env.PAYMENT_PROVIDER || 'creem') !== 'paddle') {
+    return c.json({ error: 'Not Found' }, 404);
+  }
+
   const secret = c.env.PADDLE_WEBHOOK_SECRET;
   if (!secret) {
     console.error('[Paddle Webhook] PADDLE_WEBHOOK_SECRET not configured');
@@ -32,10 +70,12 @@ paddleWebhooks.post('/', async (c) => {
   const signature = c.req.header('paddle-signature');
   const rawBody = await c.req.text();
 
-  // Verify signature (Paddle uses specific signature format)
-  // For now, just log and process
   if (!signature) {
-    console.warn('[Paddle Webhook] Missing paddle-signature header');
+    return c.json({ error: 'Missing signature' }, 401);
+  }
+
+  if (!(await verifyPaddleSignature(rawBody, signature, secret))) {
+    return c.json({ error: 'Invalid signature' }, 401);
   }
 
   let event: PaddleWebhookEvent;
