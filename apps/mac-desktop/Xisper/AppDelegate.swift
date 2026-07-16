@@ -11,6 +11,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Singleton access (NSApp.delegate cast fails inside MenuBarExtra)
     static private(set) var shared: AppDelegate?
 
+    /// Process launch timestamp used for local activation milestones.
+    static let launchTime = Date()
+
     // MARK: - Main window
 
     /// Retained reference — window is not released on close (LSUIElement app).
