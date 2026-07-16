@@ -230,6 +230,18 @@ final class AuthManager {
     /// Prefer `getValidToken()` in async contexts to ensure the token is fresh.
     func loadToken() -> String? { AuthTokenStore.load(key: "access_token") }
 
+    /// Synchronously reports whether the stored access token is still valid.
+    var isTokenValid: Bool {
+        guard isAuthenticated,
+              AuthTokenStore.load(key: "access_token") != nil,
+              let expiryString = AuthTokenStore.load(key: "token_expiry"),
+              let expiry = ISO8601DateFormatter().date(from: expiryString)
+        else {
+            return false
+        }
+        return expiry > Date()
+    }
+
     /// Returns a valid token, automatically refreshing if expired or about to expire.
     /// Multiple concurrent callers share a single refresh to avoid rotation conflicts.
     func getValidToken() async throws -> String {
