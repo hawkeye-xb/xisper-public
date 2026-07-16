@@ -338,7 +338,7 @@ async function handleASRProxyConnection(
         receivedAsrFinal = true;
         const charStats = calculateCharacterCount(text);
         totalCharCount = charStats.count;
-        console.log(`[ASR Proxy] Async transcription done: "${text.substring(0, 100)}" (${charStats.count} chars)`);
+        console.log(`[ASR Proxy] Async transcription done (${charStats.count} chars)`);
 
         sendToClient(clientWS, {
           type: 'result', code: 20000000, is_last_package: false,

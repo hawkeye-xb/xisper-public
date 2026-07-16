@@ -158,12 +158,7 @@ postprocessRouter.post('/v1/postprocess', async (c) => {
 
   const { messages } = buildPostprocessPrompt(req, loaded.template)
 
-  const systemPrompt = messages.find(m => m.role === 'system')?.content ?? ''
-  const userPrompt = messages.find(m => m.role === 'user')?.content ?? ''
-
   console.log(`[Postprocess] mode=${hasSelection ? 'SELECTED_TEXT' : 'DICTATION'}, voiceMode=${voiceMode}, template=${loaded.source}:${loaded.version}, textLen=${req.text.length}, selectedTextLen=${req.context?.selectedText?.length ?? 0}, country=${country || 'unknown'}`)
-  console.log(`[Postprocess:SystemPrompt]\n${systemPrompt}`)
-  console.log(`[Postprocess:UserPrompt]\n${userPrompt}`)
 
   const tGateway = Date.now()
   const response = await gatewayComplete(c.env.AI, c.env, {

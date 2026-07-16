@@ -349,7 +349,7 @@ export class SonioxAdapter implements ASRProviderAdapter {
     fetch(`${SonioxAdapter.SONIOX_API}/v1/transcriptions/${job.id}`, { method: 'DELETE', headers: authHeader }).catch(() => {});
     fetch(`${SonioxAdapter.SONIOX_API}/v1/files/${fileId}`, { method: 'DELETE', headers: authHeader }).catch(() => {});
 
-    console.log(`[Soniox Async] Transcript: "${transcript.text?.substring(0, 100)}..."`);
+    console.log(`[Soniox Async] Transcript received (${transcript.text?.length ?? 0} chars)`);
     return transcript.text || '';
   }
 }
