@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""生成完整的 SwiftUI 设计系统 Pencil 文件"""
+"""Generate the complete SwiftUI design system Pencil file"""
 
 import json
 
-# 基础设计系统变量 (基于 DesignTokens.swift)
+# Base design system variables (based on DesignTokens.swift)
 design = {
     "version": "2.8",
     "variables": {
@@ -55,12 +55,12 @@ design = {
     "children": []
 }
 
-print("✅ 设计系统变量已创建")
-print(f"   - {len(design['variables'])} 个 Design Tokens")
-print(f"   - 基于 DesignTokens.swift 配色方案")
+print("✅ Design system variables created")
+print(f"   - {len(design['variables'])} Design Tokens")
+print(f"   - Based on the DesignTokens.swift color scheme")
 
-# 保存基础文件
+# Save the base file
 with open('xisper-swiftui-complete.pen', 'w') as f:
     json.dump(design, f, indent=2)
 
-print("\n💾 基础文件已保存: xisper-swiftui-complete.pen")
+print("\n💾 Base file saved: xisper-swiftui-complete.pen")

@@ -6,9 +6,9 @@ Tenant: `your-tenant.logto.app` (shared endpoint, different appId per env)
 
 **Used for**: Beta env + local development (DV)
 
-Logto Console → Applications → xisper-dev → 端点和凭据
+Logto Console → Applications → xisper-dev → Endpoints & Credentials
 
-### Redirect URIs (必填)
+### Redirect URIs (required)
 ```
 https://xisper-dev.hawkeye-xb.com/auth/desktop/callback
 https://xisper-admin-beta.pages.dev/callback
@@ -35,9 +35,9 @@ http://localhost:7010
 
 ## 2. xisper-prod Application (App ID: your-production-logto-app-id)
 
-Logto Console → Applications → xisper-prod → 端点和凭据
+Logto Console → Applications → xisper-prod → Endpoints & Credentials
 
-### Redirect URIs (必填)
+### Redirect URIs (required)
 ```
 https://xisper.hawkeye-xb.com/auth/desktop/callback
 https://xisper-admin.pages.dev/callback
