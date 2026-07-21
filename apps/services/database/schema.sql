@@ -1,23 +1,23 @@
 -- AI Services Template - Database Schema
--- 用途：定义所有数据库表结构
--- 创建时间：2026-01-31
+-- Purpose: defines all database table structures
+-- Created: 2026-01-31
 
 -- ============================================
--- 用户扩展表
--- 用于存储 Logto 以外的业务数据
+-- User extension table
+-- Stores business data beyond Logto
 -- ============================================
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,           -- Logto sub (Subject ID)
-  email TEXT UNIQUE,             -- 邮箱（唯一约束，防止重复注册）
-  tier TEXT DEFAULT 'free',      -- 用户等级: free, pro, vip
-  role TEXT DEFAULT 'user',      -- 角色: user, admin
-  quota_reset_at INTEGER,        -- 配额重置时间 (Unix timestamp)
-  created_at INTEGER NOT NULL,   -- 创建时间
-  updated_at INTEGER NOT NULL,   -- 更新时间
-  metadata TEXT                  -- JSON 扩展字段，用于存储额外信息
+  email TEXT UNIQUE,             -- Email (unique constraint to prevent duplicate registration)
+  tier TEXT DEFAULT 'free',      -- User tier: free, pro, vip
+  role TEXT DEFAULT 'user',      -- Role: user, admin
+  quota_reset_at INTEGER,        -- Quota reset time (Unix timestamp)
+  created_at INTEGER NOT NULL,   -- Creation time
+  updated_at INTEGER NOT NULL,   -- Update time
+  metadata TEXT                  -- JSON extension field for additional information
 );
 
--- 创建索引以优化查询性能
+-- Create indexes to optimize query performance
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique
   ON users(email)
   WHERE email IS NOT NULL AND email != '';
@@ -25,47 +25,47 @@ CREATE INDEX IF NOT EXISTS idx_users_tier ON users(tier);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
 -- ============================================
--- 任务记录表
--- 记录所有 AI 处理任务
+-- Task records table
+-- Records all AI processing tasks
 -- ============================================
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  status TEXT NOT NULL,          -- 状态: pending, processing, completed, failed
-  r2_key TEXT,                   -- R2 存储的文件路径
-  tokens_used INTEGER DEFAULT 0, -- AI 消耗的 tokens 数量
-  error_message TEXT,            -- 错误信息（如果失败）
-  created_at INTEGER NOT NULL,   -- 创建时间
-  completed_at INTEGER,          -- 完成时间
+  status TEXT NOT NULL,          -- Status: pending, processing, completed, failed
+  r2_key TEXT,                   -- File path stored in R2
+  tokens_used INTEGER DEFAULT 0, -- Number of tokens consumed by AI
+  error_message TEXT,            -- Error message (if failed)
+  created_at INTEGER NOT NULL,   -- Creation time
+  completed_at INTEGER,          -- Completion time
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- 创建索引
+-- Create indexes
 CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
 
 -- ============================================
--- 配额使用历史表
--- 用于账单统计和用量分析
+-- Quota usage history table
+-- Used for billing statistics and usage analysis
 -- ============================================
 CREATE TABLE IF NOT EXISTS quota_history (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  task_id TEXT,                  -- 关联的任务 ID（可选）
-  tokens_used INTEGER NOT NULL,  -- 本次消耗的 tokens
-  timestamp INTEGER NOT NULL,    -- 记录时间
+  task_id TEXT,                  -- Associated task ID (optional)
+  tokens_used INTEGER NOT NULL,  -- Tokens consumed this time
+  timestamp INTEGER NOT NULL,    -- Record time
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (task_id) REFERENCES tasks(id)
 );
 
--- 创建索引
+-- Create indexes
 CREATE INDEX IF NOT EXISTS idx_quota_history_user_id ON quota_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_quota_history_timestamp ON quota_history(timestamp);
 CREATE INDEX IF NOT EXISTS idx_quota_history_task_id ON quota_history(task_id);
 
 -- ============================================
--- 订阅记录表
+-- Subscription records table
 -- ============================================
 CREATE TABLE IF NOT EXISTS subscriptions (
   id                    TEXT PRIMARY KEY,
@@ -98,28 +98,28 @@ CREATE INDEX IF NOT EXISTS idx_sub_polar_sub_id ON subscriptions(polar_subscript
 CREATE INDEX IF NOT EXISTS idx_sub_paddle_sub_id ON subscriptions(paddle_subscription_id);
 CREATE INDEX IF NOT EXISTS idx_sub_source_status ON subscriptions(source, status);
 
--- 每个用户最多一个 active/past_due 订阅
+-- At most one active/past_due subscription per user
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sub_one_active_per_user
   ON subscriptions(user_id)
   WHERE status IN ('active', 'past_due');
 
--- Creem 订阅 ID 唯一（允许多个 NULL，覆盖非 Creem 来源的订阅）
+-- Creem subscription ID is unique (multiple NULLs allowed, covering non-Creem subscriptions)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sub_creem_sub_id_unique
   ON subscriptions(creem_subscription_id)
   WHERE creem_subscription_id IS NOT NULL;
 
--- Polar 订阅 ID 唯一（允许多个 NULL，覆盖非 Polar 来源的订阅）
+-- Polar subscription ID is unique (multiple NULLs allowed, covering non-Polar subscriptions)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sub_polar_sub_id_unique
   ON subscriptions(polar_subscription_id)
   WHERE polar_subscription_id IS NOT NULL;
 
--- Paddle 订阅 ID 唯一（允许多个 NULL，覆盖非 Paddle 来源的订阅）
+-- Paddle subscription ID is unique (multiple NULLs allowed, covering non-Paddle subscriptions)
 CREATE UNIQUE INDEX IF NOT EXISTS idx_sub_paddle_sub_id_unique
   ON subscriptions(paddle_subscription_id)
   WHERE paddle_subscription_id IS NOT NULL;
 
 -- ============================================
--- 订阅变更事件表（审计日志）
+-- Subscription change events table (audit log)
 -- ============================================
 CREATE TABLE IF NOT EXISTS subscription_events (
   id              TEXT PRIMARY KEY,
@@ -139,5 +139,5 @@ CREATE INDEX IF NOT EXISTS idx_sub_events_sub ON subscription_events(subscriptio
 CREATE INDEX IF NOT EXISTS idx_sub_events_time ON subscription_events(created_at);
 
 -- ============================================
--- 初始化完成
+-- Initialization complete
 -- ============================================
