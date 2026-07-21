@@ -1,31 +1,31 @@
 -- ============================================
--- 007: 订阅系统增强
--- 1. subscriptions 表加 source + last_reconciled_at
--- 2. 新建 subscription_events 审计表
+-- 007: Subscription system enhancements
+-- 1. Add source + last_reconciled_at to the subscriptions table
+-- 2. Create the subscription_events audit table
 -- ============================================
 
--- 订阅来源：creem（支付）、admin（手动授权）、promo（促销）
+-- Subscription source: creem (payment), admin (manual grant), promo (promotion)
 ALTER TABLE subscriptions ADD COLUMN source TEXT NOT NULL DEFAULT 'creem';
 
--- 上次调外部 API 对账的时间（Unix ms），用于 reconcile 节流
+-- Last time the external API was called for reconciliation (Unix ms), used to throttle reconcile
 ALTER TABLE subscriptions ADD COLUMN last_reconciled_at INTEGER;
 
--- 复合索引：按来源+状态查询（Cron 对账用）
+-- Composite index: query by source + status (for Cron reconciliation)
 CREATE INDEX IF NOT EXISTS idx_sub_source_status ON subscriptions(source, status);
 
 -- ============================================
--- 订阅变更事件表（审计日志）
--- 记录所有订阅状态变更，用于追溯和对账
+-- Subscription change events table (audit log)
+-- Records all subscription state changes for tracing and reconciliation
 -- ============================================
 CREATE TABLE IF NOT EXISTS subscription_events (
   id              TEXT PRIMARY KEY,        -- UUID
-  subscription_id TEXT,                    -- FK → subscriptions.id，admin 直接改 tier 时可为 null
+  subscription_id TEXT,                    -- FK → subscriptions.id; can be null when admin changes tier directly
   user_id         TEXT NOT NULL,           -- FK → users.id
   trigger         TEXT NOT NULL,           -- 'webhook' | 'cron' | 'admin' | 'resolve' | 'api'
   event_type      TEXT NOT NULL,           -- 'created' | 'status_changed' | 'tier_changed' | 'reconciled' | 'expired' | 'revoked'
   before_state    TEXT,                    -- JSON: { status?, tier?, cancelAtPeriodEnd? }
   after_state     TEXT,                    -- JSON: { status?, tier?, cancelAtPeriodEnd? }
-  detail          TEXT,                    -- JSON: 补充信息
+  detail          TEXT,                    -- JSON: additional details
   created_at      INTEGER NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
