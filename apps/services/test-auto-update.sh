@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 自动更新系统测试脚本
-# 用于快速验证系统是否正常工作
+# Auto-update system test script
+# For quickly verifying the system works correctly
 
 set -e
 
-# 颜色定义
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -17,7 +17,7 @@ echo -e "${GREEN}Auto Update System Test${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# 检查服务是否运行
+# Check whether the service is running
 echo -e "${BLUE}[1/4] Checking if wrangler dev is running...${NC}"
 if curl -s http://localhost:8787/health > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Service is running${NC}"
