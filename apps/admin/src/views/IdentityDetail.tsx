@@ -147,7 +147,7 @@ export default defineComponent({
             <ElCard shadow="never" style="margin-bottom: 20px;">
               <ElForm labelPosition="top">
                 <ElFormItem label="Label">
-                  <ElInput v-model={form.label} placeholder="e.g. 程序员" />
+                  <ElInput v-model={form.label} placeholder="e.g. Developer" />
                 </ElFormItem>
                 <ElFormItem label="Description">
                   <ElInput v-model={form.description} placeholder="Optional description" />
