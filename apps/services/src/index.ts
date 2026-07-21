@@ -365,20 +365,20 @@ app.get('/', (c) => {
     <div style="text-align: center; margin-bottom: 20px;">
       <a href="/docs" class="docs-link">📚 View API Documentation</a>
     </div>
-    <div id="status" class="status info">正在初始化...</div>
+    <div id="status" class="status info">Initializing...</div>
     <div id="loginSection" style="display: none;">
-      <button class="primary" onclick="handleLogin()">🔐 使用 Logto 登录</button>
+      <button class="primary" onclick="handleLogin()">🔐 Sign in with Logto</button>
       <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
-        点击后将跳转到 Logto 进行身份验证
+        You will be redirected to Logto for authentication
       </p>
     </div>
     <div id="userSection" style="display: none;">
       <div class="input-group">
-        <label for="prompt">💬 输入你的问题</label>
-        <textarea id="prompt" placeholder="例如：用一句话解释什么是人工智能"></textarea>
+        <label for="prompt">💬 Enter your question</label>
+        <textarea id="prompt" placeholder="e.g. Explain what AI is in one sentence"></textarea>
       </div>
-      <button class="primary" onclick="handleSubmit()" id="submitBtn">🚀 发送</button>
-      <button class="secondary" onclick="handleLogout()">退出登录</button>
+      <button class="primary" onclick="handleSubmit()" id="submitBtn">🚀 Send</button>
+      <button class="secondary" onclick="handleLogout()">Sign out</button>
       <div id="result" class="result"></div>
     </div>
   </div>
@@ -398,7 +398,7 @@ app.get('/', (c) => {
       try {
         // Handle OAuth callback
         if (window.location.search.includes('code=')) {
-          updateStatus('正在处理登录...', 'info');
+          updateStatus('Processing sign-in...', 'info');
           await logtoClient.handleSignInCallback(window.location.href);
           window.history.replaceState({}, document.title, '/');
         }
@@ -425,19 +425,19 @@ app.get('/', (c) => {
         }
       } catch (error) {
         console.error('Logto initialization error:', error);
-        updateStatus('❌ 初始化失败: ' + error.message, 'error');
+        updateStatus('❌ Initialization failed: ' + error.message, 'error');
         showLoginSection();
       }
     }
     
     function showLoginSection() {
-      updateStatus('👋 欢迎！请先登录', 'info');
+      updateStatus('👋 Welcome! Please sign in first', 'info');
       document.getElementById('loginSection').style.display = 'block';
       document.getElementById('userSection').style.display = 'none';
     }
     
     function showUserSection(user) {
-      updateStatus(\`✅ 已登录: \${user.email || user.username || user.sub}\`, 'success');
+      updateStatus(\`✅ Signed in: \${user.email || user.username || user.sub}\`, 'success');
       document.getElementById('loginSection').style.display = 'none';
       document.getElementById('userSection').style.display = 'block';
     }
@@ -446,7 +446,7 @@ app.get('/', (c) => {
       try {
         await logtoClient.signIn(config.redirectUri);
       } catch (error) {
-        updateStatus('❌ 登录失败: ' + error.message, 'error');
+        updateStatus('❌ Sign-in failed: ' + error.message, 'error');
       }
     }
     
@@ -455,7 +455,7 @@ app.get('/', (c) => {
         await logtoClient.signOut(config.redirectUri);
         accessToken = null;
       } catch (error) {
-        updateStatus('❌ 退出失败: ' + error.message, 'error');
+        updateStatus('❌ Sign-out failed: ' + error.message, 'error');
       }
     }
     
@@ -463,12 +463,12 @@ app.get('/', (c) => {
       const prompt = document.getElementById('prompt').value.trim();
       
       if (!prompt) {
-        updateStatus('⚠️ 请输入问题', 'error');
+        updateStatus('⚠️ Please enter a question', 'error');
         return;
       }
       
       if (!accessToken) {
-        updateStatus('❌ 未登录，请刷新页面重试', 'error');
+        updateStatus('❌ Not signed in; please refresh and try again', 'error');
         return;
       }
       
@@ -476,8 +476,8 @@ app.get('/', (c) => {
       const resultDiv = document.getElementById('result');
       
       submitBtn.disabled = true;
-      submitBtn.textContent = '⏳ 处理中...';
-      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI 正在思考...</p></div>';
+      submitBtn.textContent = '⏳ Processing...';
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is thinking...</p></div>';
       resultDiv.classList.add('show');
       
       try {
@@ -494,34 +494,34 @@ app.get('/', (c) => {
         
         if (data.success) {
           resultDiv.innerHTML = \`
-            <h3>✨ AI 回答</h3>
+            <h3>✨ AI Response</h3>
             <p>\${data.task.response}</p>
             <div class="quota">
               <div class="quota-item">
-                <div class="quota-label">已使用</div>
+                <div class="quota-label">Used</div>
                 <div class="quota-value">\${data.quota.used}</div>
               </div>
               <div class="quota-item">
-                <div class="quota-label">剩余次数</div>
+                <div class="quota-label">Remaining</div>
                 <div class="quota-value">\${data.quota.remaining}</div>
               </div>
               <div class="quota-item">
-                <div class="quota-label">消耗 Token</div>
+                <div class="quota-label">Tokens Used</div>
                 <div class="quota-value">\${data.task.tokensUsed}</div>
               </div>
             </div>
           \`;
-          updateStatus('✅ 调用成功', 'success');
+          updateStatus('✅ Request succeeded', 'success');
         } else {
-          throw new Error(data.error || '未知错误');
+          throw new Error(data.error || 'Unknown error');
         }
       } catch (error) {
         console.error('Submit error:', error);
         resultDiv.innerHTML = \`<p style="color: #c62828;">❌ \${error.message}</p>\`;
-        updateStatus('❌ 调用失败', 'error');
+        updateStatus('❌ Request failed', 'error');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '🚀 发送';
+        submitBtn.textContent = '🚀 Send';
       }
     }
     
