@@ -113,8 +113,8 @@ private struct PreferencesCard: View {
     private static let uiLanguages: [(id: String, label: String)] = [
         ("",        NSLocalizedString("System", comment: "")),
         ("en",      "English"),
-        ("zh-Hans", "简体中文"),
-        ("ja",      "日本語"),
+        ("zh-Hans", "Chinese (Simplified)"),
+        ("ja",      "Japanese"),
     ]
 
     private var currentAppearance: Appearance {
@@ -338,125 +338,38 @@ private struct ShortcutsCard: View {
     }
 
     @ViewBuilder
-    private func recordingView(for action: ShortcutAction) -> some View {
+    private func recordingView(for action: AppShortcutAction) -> some View {
         HStack(spacing: 8) {
-            Group {
-                if !recordingKeys.isEmpty {
-                    HStack(spacing: 4) {
-                        ForEach(Array(recordingKeys.enumerated()), id: \.offset) { index, key in
-                            if index > 0 {
-                                Text("+")
-                                    .font(.system(size: 13, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(Color.neutral7)
-                            }
-                            Text(ShortcutKey.formatKeySymbol(key))
-                                .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                .foregroundStyle(Color.neutral12)
-                        }
-                    }
-                } else {
-                    Text(NSLocalizedString("Press keys…", comment: ""))
-                        .font(.system(size: 13, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Color.neutral7)
-                }
-            }
-            .frame(minWidth: 180)
-            .frame(height: 32)
-            .padding(.horizontal, DesignSpacing.xxxs)
-            .background(Color.neutral1)
-            .clipShape(RoundedRectangle(cornerRadius: DesignRadius.sm))
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignRadius.sm)
-                    .stroke(Color.primary8, lineWidth: 2)
-            )
+            Text(NSLocalizedString("Press keys…", comment: ""))
+                .font(.system(size: 12))
+                .foregroundStyle(Color.neutral7)
 
-            Button(action: { saveShortcut(for: action.id) }) {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.onPrimary)
-                    .frame(width: 28, height: 28)
-                    .background(recordingKeys.isEmpty ? Color.neutral5 : Color.primary8)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignRadius.sm))
+            if !recordingKeys.isEmpty {
+                Text(recordingKeys.joined(separator: " + "))
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(Color.primary8)
             }
-            .buttonStyle(.plain)
-            .disabled(recordingKeys.isEmpty)
 
-            Button(action: { cancelEditing() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.neutral9)
-                    .frame(width: 28, height: 28)
-                    .background(Color.neutral1)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignRadius.sm))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignRadius.sm)
-                            .stroke(Color.neutral3, lineWidth: 1)
-                    )
-            }
-            .buttonStyle(.plain)
+            Button(NSLocalizedString("Cancel", comment: "")) { cancelEditing() }
+                .buttonStyle(.plain)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.neutral7)
         }
-
-        if let error = validationError {
-            Text(error)
-                .font(.system(size: 11))
-                .foregroundStyle(Color.danger8)
-                .padding(.top, 2)
-        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.primary1)
+        .clipShape(RoundedRectangle(cornerRadius: DesignRadius.sm))
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignRadius.sm)
+                .stroke(Color.primary6, lineWidth: 1)
+        )
     }
 
     private func startEditing(_ actionId: String) {
-        cancelEditing()
         editingActionId = actionId
         heldKeys = []
         recordingKeys = []
         validationError = nil
-        HotkeySystem.shared.enterCaptureMode()
-        HotkeySystem.shared.captureCallback = { [self] event in
-            handleCaptureEvent(event)
-        }
-    }
-
-    private func handleCaptureEvent(_ event: CaptureKeyEvent) {
-        switch event.type {
-        case .down:
-            heldKeys.insert(event.key)
-            validationError = nil
-            rebuildRecordingKeys()
-        case .up:
-            heldKeys.remove(event.key)
-        }
-    }
-
-    private func rebuildRecordingKeys() {
-        var mods: [String] = []
-        var main: String?
-        for k in heldKeys {
-            if ShortcutKey.isModifier(k) { mods.append(k) }
-            else { main = k }
-        }
-        recordingKeys = main != nil ? mods + [main!] : mods
-    }
-
-    private func saveShortcut(for actionId: String) {
-        guard !recordingKeys.isEmpty else { cancelEditing(); return }
-        let shortcutString = formatShortcut(recordingKeys)
-
-        if let error = ShortcutValidator.validate(shortcutString) {
-            validationError = error
-            return
-        }
-        if let conflict = store.conflictingAction(for: shortcutString, excluding: actionId) {
-            validationError = String(format: NSLocalizedString("Already used by %@", comment: ""), conflict)
-            return
-        }
-        if ShortcutTargetParser.parse(actionId: actionId, shortcut: shortcutString) == nil {
-            validationError = NSLocalizedString("Unsupported key combination", comment: "")
-            return
-        }
-
-        store.updateShortcuts(actionId: actionId, shortcuts: [shortcutString])
-        cancelEditing()
-        HotkeySystem.shared.reloadShortcuts()
     }
 
     private func cancelEditing() {
@@ -464,75 +377,54 @@ private struct ShortcutsCard: View {
         heldKeys = []
         recordingKeys = []
         validationError = nil
-        HotkeySystem.shared.captureCallback = nil
-        HotkeySystem.shared.exitCaptureMode()
+    }
+
+    private func shortcutDisplayKeys(_ shortcut: String) -> [String] {
+        shortcut.split(separator: "+").map { String($0).trimmingCharacters(in: .whitespaces) }
     }
 }
 
-// MARK: - 3. Audio (hardware / sound)
+// MARK: - 3. Audio (device & behavior)
 
 private struct AudioCard: View {
-    @State private var inputDevices: [AudioInputDevice] = []
     private var config: ConfigStore { ConfigStore.shared }
+    @State private var audioTestState: AudioTestState = .idle
 
-    /// Whether the user-selected device is currently offline.
-    private var selectedDeviceOffline: Bool {
-        guard let uid = config.selectedMicrophoneId, !uid.isEmpty else { return false }
-        return !inputDevices.contains { $0.uid == uid }
+    private enum AudioTestState {
+        case idle, recording, playing
     }
 
     var body: some View {
         SettingsCard(title: NSLocalizedString("Audio", comment: "")) {
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    SettingRow(NSLocalizedString("Microphone", comment: ""), description: NSLocalizedString("Audio input device", comment: ""))
-                    if selectedDeviceOffline {
-                        Text(NSLocalizedString("Selected device is offline — will use System Default", comment: ""))
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.warning8)
-                    }
-                }
+                SettingRow(NSLocalizedString("Input Device", comment: ""), description: NSLocalizedString("Microphone used for recording", comment: ""))
                 Spacer()
-                Picker("", selection: Binding(
-                    get: { config.selectedMicrophoneId ?? "" },
-                    set: { newValue in
-                        let uid = newValue.isEmpty ? nil : newValue
-                        config.set(selectedMicrophoneId: uid)
-                        // Switch standby engine to the new device immediately.
-                        RecordingCoordinator.shared.switchAudioDevice(to: uid)
-                    }
-                )) {
-                    Text(NSLocalizedString("System Default", comment: "")).tag("")
-                    ForEach(inputDevices) { device in
-                        Text(device.name).tag(device.uid)
-                    }
-                }
-                .labelsHidden()
-                .frame(width: 200, alignment: .trailing)
-            }
-            .padding(.vertical, 8)
-            .onAppear { refreshDevices() }
-            .onReceive(NotificationCenter.default.publisher(for: .audioDeviceListChanged)) { _ in
-                refreshDevices()
-            }
-
-            CardDivider()
-
-            HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Sound Effects", comment: ""), description: NSLocalizedString("Play sounds when recording starts/stops", comment: ""))
-                Spacer()
-                Toggle("", isOn: config.soundEffectsBinding)
-                    .toggleStyle(.switch)
-                    .labelsHidden()
+                Text(currentInputDeviceName())
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.neutral9)
             }
             .padding(.vertical, 8)
 
             CardDivider()
 
             HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Mute System Audio", comment: ""), description: NSLocalizedString("Silence system sounds while recording", comment: ""))
+                SettingRow(NSLocalizedString("Test Microphone", comment: ""), description: NSLocalizedString("Record a short clip and play it back", comment: ""))
                 Spacer()
-                Toggle("", isOn: config.muteSystemBinding)
+                Button(audioTestButtonTitle) {
+                    handleAudioTest()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.primary8)
+                .disabled(audioTestState == .playing)
+            }
+            .padding(.vertical, 8)
+
+            CardDivider()
+
+            HStack(alignment: .center) {
+                SettingRow(NSLocalizedString("Mute Other Audio", comment: ""), description: NSLocalizedString("Lower system volume while recording", comment: ""))
+                Spacer()
+                Toggle("", isOn: config.muteSystemAudioBinding)
                     .toggleStyle(.switch)
                     .labelsHidden()
             }
@@ -540,271 +432,74 @@ private struct AudioCard: View {
         }
     }
 
-    private func refreshDevices() {
-        inputDevices = AudioEngine.listInputDevices()
+    private var audioTestButtonTitle: String {
+        switch audioTestState {
+        case .idle:      return NSLocalizedString("Start Test", comment: "")
+        case .recording: return NSLocalizedString("Stop & Play", comment: "")
+        case .playing:   return NSLocalizedString("Playing…", comment: "")
+        }
+    }
 
-        // If user had selected a device that's now gone, auto-reset to System Default
-        if let uid = config.selectedMicrophoneId, !uid.isEmpty,
-           !inputDevices.contains(where: { $0.uid == uid }) {
-            // Keep the stored preference (device may come back online),
-            // but the warning label tells the user what's happening.
+    private func currentInputDeviceName() -> String {
+        var deviceID = AudioDeviceID(0)
+        var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        let status = AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address, 0, nil, &size, &deviceID
+        )
+        guard status == noErr else { return NSLocalizedString("Unknown", comment: "") }
+
+        var nameSize = UInt32(MemoryLayout<CFString>.size)
+        var nameAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyDeviceNameCFString,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var name: CFString = "" as CFString
+        let nameStatus = withUnsafeMutablePointer(to: &name) { ptr -> OSStatus in
+            AudioObjectGetPropertyData(deviceID, &nameAddress, 0, nil, &nameSize, ptr)
+        }
+        guard nameStatus == noErr else { return NSLocalizedString("Unknown", comment: "") }
+        return name as String
+    }
+
+    private func handleAudioTest() {
+        switch audioTestState {
+        case .idle:
+            audioTestState = .recording
+            Task {
+                await AudioTestManager.shared.startRecording()
+            }
+        case .recording:
+            audioTestState = .playing
+            Task {
+                await AudioTestManager.shared.stopAndPlay()
+                await MainActor.run { audioTestState = .idle }
+            }
+        case .playing:
+            break
         }
     }
 }
 
-// MARK: - 4. Integration (AI & webhook)
+// MARK: - 4. Integration (webhook & advanced)
 
 private struct IntegrationCard: View {
+    private var config: ConfigStore { ConfigStore.shared }
+    @State private var webhookURL: String = ""
+    @State private var showSavedFeedback = false
+
     var body: some View {
         SettingsCard(title: NSLocalizedString("Integration", comment: "")) {
-            HStack(alignment: .top) {
-                SettingRow(NSLocalizedString("AI Post-processing", comment: ""), description: NSLocalizedString("Text is automatically refined by Xisper's AI after recognition. Always enabled.", comment: ""))
-                Spacer()
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(Color.success8)
-            }
-            .padding(.vertical, 8)
-
-            CardDivider()
-
-            WebhookInlineSection()
-        }
-    }
-}
-
-/// Webhook rows inlined into Integration card (no card wrapper)
-private struct WebhookInlineSection: View {
-    @AppStorage("xisper.webhook.enabled")      private var enabled  = false
-    @AppStorage("xisper.webhook.url")          private var url      = ""
-    @AppStorage("xisper.webhook.method")       private var method   = "POST"
-    @AppStorage("xisper.webhook.bodyTemplate") private var bodyTemplate = #"{"text":"{{text}}","timestamp":"{{timestamp}}"}"#
-
-    @State private var testStatus: String?
-    @State private var isTesting  = false
-
-    var body: some View {
-        HStack(alignment: .center) {
-            SettingRow(NSLocalizedString("Webhook", comment: ""), description: NSLocalizedString("Send HTTP request after each transcription", comment: ""))
-            Spacer()
-            Toggle("", isOn: $enabled).labelsHidden()
-                .toggleStyle(.switch)
-        }
-        .padding(.vertical, 8)
-
-        if enabled {
-            CardDivider()
-
             HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Endpoint URL", comment: ""))
+                SettingRow(NSLocalizedString("Post-processing", comment: ""), description: NSLocalizedString("Use LLM to clean up transcription text", comment: ""))
                 Spacer()
-                TextField(NSLocalizedString("https://example.com/webhook", comment: ""), text: $url)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 250, alignment: .trailing)
-            }
-            .padding(.vertical, 8)
-
-            CardDivider()
-
-            HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Method", comment: ""))
-                Spacer()
-                Picker("", selection: $method) {
-                    Text("POST").tag("POST")
-                    Text("PUT").tag("PUT")
-                    Text("PATCH").tag("PATCH")
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(width: 200, alignment: .trailing)
-            }
-            .padding(.vertical, 8)
-
-            CardDivider()
-
-            VStack(alignment: .leading, spacing: DesignSpacing.xxxs) {
-                SettingRow(NSLocalizedString("Body Template", comment: ""))
-
-                TextEditor(text: $bodyTemplate)
-                    .font(.system(size: 13, weight: .regular, design: .monospaced))
-                    .frame(height: 80)
-                    .padding(4)
-                    .background(Color.neutral1)
-                    .overlay(RoundedRectangle(cornerRadius: DesignRadius.sm).stroke(Color.neutral3))
-
-                Text(NSLocalizedString("Variables: {{text}}, {{rawText}}, {{timestamp}}, {{duration}}, {{sessionId}}", comment: ""))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.neutral7)
-            }
-            .padding(.vertical, 8)
-
-            HStack {
-                Spacer()
-                if let status = testStatus {
-                    Text(status)
-                        .font(.system(size: 12))
-                        .foregroundStyle(status.contains("OK") ? Color.success8 : Color.danger8)
-                }
-                Button(action: sendTestWebhook) {
-                    if isTesting {
-                        ProgressView().controlSize(.small).frame(width: 40)
-                    } else {
-                        Text(NSLocalizedString("Send Test", comment: ""))
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                }
-                .disabled(url.isEmpty || isTesting)
-                .buttonStyle(.plain)
-                .padding(.horizontal, DesignSpacing.xxs)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: DesignRadius.sm)
-                        .fill(Color.primary8.opacity(url.isEmpty || isTesting ? 0.4 : 1.0))
-                )
-                .foregroundStyle(Color.onPrimary)
-            }
-            .padding(.top, 4)
-        }
-    }
-
-    private func sendTestWebhook() {
-        guard let reqURL = URL(string: url) else {
-            testStatus = NSLocalizedString("Invalid URL", comment: ""); return
-        }
-        isTesting = true
-        testStatus = nil
-
-        let sampleBody = bodyTemplate
-            .replacingOccurrences(of: "{{text}}", with: NSLocalizedString("Test transcription", comment: ""))
-            .replacingOccurrences(of: "{{rawText}}", with: NSLocalizedString("Test transcription", comment: ""))
-            .replacingOccurrences(of: "{{timestamp}}", with: ISO8601DateFormatter().string(from: Date()))
-            .replacingOccurrences(of: "{{duration}}", with: "3.5")
-            .replacingOccurrences(of: "{{sessionId}}", with: UUID().uuidString)
-
-        var req = URLRequest(url: reqURL)
-        req.httpMethod = method
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = sampleBody.data(using: .utf8)
-
-        Task {
-            do {
-                let (_, response) = try await URLSession.shared.data(for: req)
-                let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-                await MainActor.run {
-                    testStatus = code >= 200 && code < 300 ? "✓ \(code) \(NSLocalizedString("OK", comment: ""))" : "✗ \(code)"
-                    isTesting  = false
-                }
-            } catch {
-                await MainActor.run {
-                    testStatus = String(format: NSLocalizedString("Error: %@", comment: ""), error.localizedDescription)
-                    isTesting  = false
-                }
-            }
-        }
-    }
-}
-
-// MARK: - 5. Account (user + system meta)
-
-private struct AccountCard: View {
-    @AppStorage("launchAtLogin") private var launchAtLogin = false
-    @State private var userEmail = ""
-    @State private var userName = ""
-    @State private var currentTier = "free"
-    @State private var isUpgrading = false
-    @State private var upgradeError: String?
-    @State private var manageError: String?
-
-    private var versionString: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        return AppEnvironment.isDevBackend ? "\(version)-beta" : version
-    }
-
-    var body: some View {
-        SettingsCard(title: NSLocalizedString("Account & System", comment: "")) {
-            // User info row
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(Color.primary8)
-                        .frame(width: 36, height: 36)
-                    Text(userInitials)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.onPrimary)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                    Text(userName.isEmpty ? NSLocalizedString("User", comment: "") : userName)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.neutral12)
-
-                        // Tier badge (non-free users)
-                        if currentTier.lowercased() != "free" {
-                            Text(currentTier.capitalized)
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(currentTier.tierBadgeColor, in: Capsule())
-                        }
-                    }
-                    Text(userEmail.isEmpty ? NSLocalizedString("user@example.com", comment: "") : userEmail)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(Color.neutral7)
-                        .lineLimit(1)
-                }
-
-                Spacer()
-
-                // Upgrade button (free users only)
-                if currentTier.lowercased() == "free" {
-                    VStack(spacing: 4) {
-                        upgradeButton
-                        if let error = upgradeError {
-                            Text(error)
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.danger8)
-                                .lineLimit(2)
-                                .frame(maxWidth: 140)
-                        }
-                    }
-                }
-
-                Button {
-                    Task { await AuthManager.shared.logout() }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .font(.system(size: 12))
-                        Text(NSLocalizedString("Sign Out", comment: ""))
-                            .font(.system(size: 12, weight: .medium))
-                    }
-                    .foregroundStyle(Color.danger8)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignRadius.sm)
-                            .stroke(Color.neutral3, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.vertical, 8)
-
-            // Manage subscription (pro+ users)
-            if currentTier.lowercased() != "free" {
-                CardDivider()
-                manageSubscriptionRow
-            }
-
-            CardDivider()
-
-            // Launch at Login
-            HStack(alignment: .center) {
-                SettingRow(NSLocalizedString("Launch at Login", comment: ""), description: NSLocalizedString("Start automatically when you log in", comment: ""))
-                Spacer()
-                Toggle("", isOn: $launchAtLogin)
+                Toggle("", isOn: config.postProcessingEnabledBinding)
                     .toggleStyle(.switch)
                     .labelsHidden()
             }
@@ -812,166 +507,141 @@ private struct AccountCard: View {
 
             CardDivider()
 
-            // Version
-            HStack(alignment: .center) {
-                Text(NSLocalizedString("Version", comment: ""))
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.neutral9)
-                Spacer()
-                HStack(spacing: 6) {
-                    Text(versionString)
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(Color.neutral12)
-                    if AppEnvironment.isDevBackend {
-                        Text("BETA")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange, in: Capsule())
+            VStack(alignment: .leading, spacing: 8) {
+                SettingRow(NSLocalizedString("Webhook URL", comment: ""), description: NSLocalizedString("Send transcription results to this URL (e.g. n8n, Zapier)", comment: ""))
+                HStack(spacing: 8) {
+                    TextField("https://…", text: $webhookURL)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 13, design: .monospaced))
+                    Button(showSavedFeedback ? NSLocalizedString("Saved ✓", comment: "") : NSLocalizedString("Save", comment: "")) {
+                        config.set(webhookURL: webhookURL)
+                        withAnimation { showSavedFeedback = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation { showSavedFeedback = false }
+                        }
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.primary8)
+                    .disabled(webhookURL == config.webhookURL)
                 }
             }
             .padding(.vertical, 8)
+            .onAppear { webhookURL = config.webhookURL }
         }
-        .onAppear {
-            userEmail = AuthManager.shared.userEmail ?? ""
-            userName = extractUserName(from: userEmail)
-            currentTier = UsageManager.shared.tier
-        }
-        .onChange(of: UsageManager.shared.tier) { _, newTier in
-            currentTier = newTier
-        }
-    }
-
-    // MARK: - Upgrade Button
-
-    @ViewBuilder
-    private var upgradeButton: some View {
-        Button {
-            isUpgrading = true
-            upgradeError = nil
-            Task {
-                await PaymentManager.shared.startUpgrade()
-                if let error = PaymentManager.shared.lastError {
-                    upgradeError = error
-                    // Token expired → prompt re-login
-                    if error.contains("Not authenticated") {
-                        upgradeError = NSLocalizedString("Session expired, please sign out and sign in again", comment: "")
-                    }
-                }
-                isUpgrading = false
-            }
-        } label: {
-            HStack(spacing: 4) {
-                if isUpgrading {
-                    ProgressView()
-                        .controlSize(.small)
-                        .scaleEffect(0.7)
-                } else {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 11))
-                }
-                Text(NSLocalizedString("Upgrade to Pro", comment: ""))
-                    .font(.system(size: 12, weight: .semibold))
-            }
-            .foregroundStyle(Color.onPrimary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.primary8, in: RoundedRectangle(cornerRadius: DesignRadius.sm))
-        }
-        .buttonStyle(.plain)
-        .disabled(isUpgrading)
-    }
-
-    // MARK: - Manage Subscription Row
-
-    @ViewBuilder
-    private var manageSubscriptionRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(NSLocalizedString("Subscription", comment: ""))
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color.neutral12)
-                    Text(subscriptionDescription)
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.neutral7)
-                }
-                Spacer()
-
-                Button {
-                    manageError = nil
-                    Task {
-                        await PaymentManager.shared.openBillingPortal()
-                        manageError = PaymentManager.shared.lastError
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.up.right.square")
-                            .font(.system(size: 12))
-                        Text(NSLocalizedString("Manage", comment: ""))
-                            .font(.system(size: 12, weight: .medium))
-                    }
-                    .foregroundStyle(Color.primary8)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DesignRadius.sm)
-                            .stroke(Color.neutral3, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            if let error = manageError {
-                Text(error)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.red)
-            }
-        }
-        .padding(.vertical, 8)
-    }
-
-    private var subscriptionDescription: String {
-        let mgr = UsageManager.shared
-        if mgr.subscriptionCancelAtPeriodEnd, let end = mgr.subscriptionPeriodEnd {
-            let fmt = DateFormatter()
-            fmt.dateStyle = .medium
-            return String(format: NSLocalizedString("Cancels on %@", comment: ""), fmt.string(from: end))
-        }
-        if let end = mgr.subscriptionPeriodEnd {
-            let fmt = DateFormatter()
-            fmt.dateStyle = .medium
-            return String(format: NSLocalizedString("Renews on %@", comment: ""), fmt.string(from: end))
-        }
-        return NSLocalizedString("Manage billing and subscription", comment: "")
-    }
-
-    // MARK: - Helpers
-
-    private var userInitials: String {
-        let name = userName.isEmpty ? NSLocalizedString("User", comment: "") : userName
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
-    }
-
-    private func extractUserName(from email: String) -> String {
-        let local = email.split(separator: "@").first ?? ""
-        return String(local).capitalized
     }
 }
 
-// MARK: - Section style modifier (kept for legacy compat)
+// MARK: - 5. Account (identity & updates)
 
-extension View {
-    func sectionStyle() -> some View {
-        self
-            .padding(.top, DesignSpacing.xxs)
-            .overlay(alignment: .bottom) {
-                Color.neutral3.frame(height: 1)
+private struct AccountCard: View {
+    private var auth: AuthManager { AuthManager.shared }
+    private var usage: UsageManager { UsageManager.shared }
+    @State private var isCheckingUpdate = false
+
+    var body: some View {
+        SettingsCard(title: NSLocalizedString("Account", comment: "")) {
+            HStack(alignment: .center) {
+                SettingRow(
+                    auth.userEmail ?? NSLocalizedString("Not signed in", comment: ""),
+                    description: auth.isLoggedIn ? nil : NSLocalizedString("Sign in to sync your data", comment: "")
+                )
+                Spacer()
+                if auth.isLoggedIn {
+                    Button(NSLocalizedString("Sign Out", comment: "")) {
+                        auth.logout()
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    Button(NSLocalizedString("Sign In", comment: "")) {
+                        auth.startLoginFlow()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.primary8)
+                }
             }
+            .padding(.vertical, 8)
+
+            if auth.isLoggedIn {
+                CardDivider()
+
+                // Usage summary
+                HStack(alignment: .center) {
+                    SettingRow(
+                        NSLocalizedString("Plan", comment: ""),
+                        description: usage.isUnlimitedTier ? NSLocalizedString("Unlimited usage", comment: "") : nil
+                    )
+                    Spacer()
+                    Text(planDisplayName)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(usage.isUnlimitedTier ? Color.success8 : Color.neutral12)
+                }
+                .padding(.vertical, 8)
+
+                if usage.showsFiniteCharacterQuotaBar {
+                    CardDivider()
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(NSLocalizedString("Characters Used", comment: ""))
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color.neutral9)
+                            Spacer()
+                            Text("\(usage.asrCharacters.used) / \(usage.asrCharacters.limit)")
+                                .font(.system(size: 13, design: .monospaced))
+                                .foregroundStyle(Color.neutral12)
+                        }
+                        ProgressView(value: usage.asrCharacters.fraction)
+                            .tint(quotaBarColor)
+                        Text(NSLocalizedString("Resets", comment: "") + " " + usage.resetLabel)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.neutral7)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+
+            CardDivider()
+
+            HStack(alignment: .center) {
+                SettingRow(NSLocalizedString("Version", comment: ""), description: Bundle.main.appVersionString)
+                Spacer()
+                Button(isCheckingUpdate ? NSLocalizedString("Checking…", comment: "") : NSLocalizedString("Check for Updates", comment: "")) {
+                    isCheckingUpdate = true
+                    SUStandardUpdaterController().checkForUpdates(nil)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        isCheckingUpdate = false
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(isCheckingUpdate)
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var planDisplayName: String {
+        switch usage.tier.lowercased() {
+        case "pro":        return "Pro"
+        case "unlimited":  return "Unlimited"
+        case "enterprise": return "Enterprise"
+        default:           return "Free"
+        }
+    }
+
+    private var quotaBarColor: Color {
+        let f = usage.asrCharacters.fraction
+        if f >= 0.9 { return Color.danger8 }
+        if f >= 0.7 { return Color.warning8 }
+        return Color.primary8
+    }
+}
+
+// MARK: - Bundle version helper
+
+extension Bundle {
+    var appVersionString: String {
+        let version = infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
     }
 }
