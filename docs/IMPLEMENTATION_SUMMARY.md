@@ -209,7 +209,7 @@ The implementation includes automatic fallback:
 
 - Quick Start: [`docs/asr-proxy-quickstart.md`](./asr-proxy-quickstart.md)
 - Complete Setup: [`docs/asr-proxy-setup.md`](./asr-proxy-setup.md)
-- Implementation Plan: See `.cursor/plans/asr_代理转发方案_*.plan.md`
+- Implementation Plan: See `.cursor/plans/asr_proxy_forwarding_*.plan.md`
 
 ## ✅ Testing Checklist
 

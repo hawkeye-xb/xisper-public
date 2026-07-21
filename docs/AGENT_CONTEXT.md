@@ -70,9 +70,8 @@ Xisper/
 │   └── i18n-tools/        # i18n tooling
 │
 └── docs/
-    ├── feature-parity-plan.md   # Detailed feature parity plan (READ THIS)
-    ├── 录音转写架构文档.md        # Full recording/transcription architecture doc
-    └── AGENT_CONTEXT.md          # This file
+    ├── ASR-RECORDING-ARCHITECTURE.md  # Recording/transcription architecture doc
+    └── AGENT_CONTEXT.md                # This file
 ```
 
 ---
@@ -151,7 +150,7 @@ Planned new dylibs:
 
 ## 5. Recording & Transcription Flow
 
-Detailed architecture is in `docs/录音转写架构文档.md`. Here's the summary:
+Detailed architecture is in `docs/ASR-RECORDING-ARCHITECTURE.md`. Here's the summary:
 
 ```
 ┌─ Hotkey (Fn) detected by fn-key-monitor (Rust, CGEventTap) ──────────────┐
@@ -263,7 +262,7 @@ Response:
 
 ## 8. Planned Work (Task Breakdown)
 
-Full details in `docs/feature-parity-plan.md`. Summary:
+Summary of planned work:
 
 ### Batch 0 (Independent, quick wins):
 - **T9**: Auto-mute system audio during recording (AppleScript `set volume`)
