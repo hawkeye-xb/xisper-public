@@ -50,7 +50,7 @@ export interface PostprocessRequest {
   // Speech language hint for model selection
   speechLanguage?: string  // e.g., "zh-CN", "en-US", "ja-JP"
 
-  // Identity context: label + description of the active identity (e.g. "程序员 — 软件开发、编程")
+  // Identity context: label + description of the active identity (e.g. "Developer — software development, programming")
   identityContext?: string
 
   // Identity ID — when set, server reads identity from KV and overrides

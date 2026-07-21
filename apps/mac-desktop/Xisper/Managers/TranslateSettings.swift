@@ -13,8 +13,8 @@ final class TranslateSettings {
     static let languages: [TranslateLanguageOption] = [
         .init(id: "auto",  label: "Auto"),
         .init(id: "en",    label: "English"),
-        .init(id: "zh-CN", label: "中文（简体）"),
-        .init(id: "ja",    label: "日本語"),
+        .init(id: "zh-CN", label: "Chinese (Simplified)"),
+        .init(id: "ja",    label: "Japanese"),
         .init(id: "ko",    label: "한국어"),
         .init(id: "fr",    label: "Français"),
         .init(id: "de",    label: "Deutsch"),

@@ -1,6 +1,6 @@
 /**
  * Copy text to clipboard with fallback support
- * 复制文本到剪贴板，支持回退方案以确保兼容性
+ * Copy text to the clipboard, with a fallback for compatibility
  */
 export interface CopyResult {
   success: boolean;
@@ -67,7 +67,7 @@ function fallbackCopyToClipboard(text: string): CopyResult {
 
 /**
  * Copy text to clipboard with message integration
- * 使用消息提示的剪贴板复制功能
+ * Clipboard copy with a message notification
  * @param text - Text to copy
  * @param options - Configuration options
  */
@@ -100,7 +100,7 @@ export async function copyWithMessage(
 
 /**
  * Vue Composition API hook for clipboard functionality
- * Vue 组合式 API 的剪贴板功能钩子
+ * Clipboard hook for Vue Composition API
  */
 export function useClipboard() {
   const copy = async (text: string): Promise<CopyResult> => {
@@ -115,4 +115,3 @@ export function useClipboard() {
     ) => copyWithMessage(text, options)
   };
 }
-

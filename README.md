@@ -1,7 +1,5 @@
 # Xisper
 
-**English** · [简体中文](./README.zh-CN.md)
-
 > Hold a key, speak, release — your words appear as text in whatever app you're using.
 
 Xisper is a native macOS voice-to-text tool that lives in your menu bar. Press and hold a hotkey, talk, and let go; Xisper streams your speech to a speech-recognition engine, cleans it up with an LLM, and types the result straight into the app you're focused on — your editor, your email, your chat window, anywhere.

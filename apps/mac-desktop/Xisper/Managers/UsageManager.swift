@@ -64,7 +64,7 @@ final class UsageManager {
 
     private init() {}
 
-    /// Sidebar: unlimited users get a premium identity block — never the finite quota bar (product: “高贵” tier, not metering).
+    /// Sidebar: unlimited users get a premium identity block — never the finite quota bar (product: "premium" tier, not metering).
     var isUnlimitedTier: Bool {
         tier.lowercased() == "unlimited"
     }
