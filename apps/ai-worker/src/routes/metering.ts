@@ -60,37 +60,32 @@ meteringRouter.post('/v1/metering', async (c) => {
     switch (action) {
       case 'consume_duration': {
         const weekKey = getWeekKey()
-        const result = await db.prepare(
-          'SELECT duration_used FROM user_asr_quota WHERE user_id = ? AND week_key = ?'
-        ).bind(userId, weekKey).first<{ duration_used: number }>()
-
-        if (result) {
-          await db.prepare(
-            'UPDATE user_asr_quota SET duration_used = duration_used + ?, tier = ?, updated_at = ? WHERE user_id = ? AND week_key = ?'
-          ).bind(Math.floor(amount), tier, now, userId, weekKey).run()
-        } else {
-          await db.prepare(
-            'INSERT INTO user_asr_quota (id, user_id, week_key, duration_used, characters_used, tier, updated_at, created_at) VALUES (?, ?, ?, ?, 0, ?, ?, ?)'
-          ).bind(`asr_${userId}_${weekKey}`, userId, weekKey, Math.floor(amount), tier, now, now).run()
-        }
+        // Atomic upsert — one statement, no SELECT-then-INSERT race. On the first
+        // consume of a new week two concurrent sessions used to both SELECT null,
+        // both INSERT, and the second hit UNIQUE(user_id, week_key) → its charge was
+        // silently dropped. ON CONFLICT collapses that to a safe atomic increment.
+        await db.prepare(
+          `INSERT INTO user_asr_quota (id, user_id, week_key, duration_used, characters_used, tier, updated_at, created_at)
+           VALUES (?, ?, ?, ?, 0, ?, ?, ?)
+           ON CONFLICT(user_id, week_key) DO UPDATE SET
+             duration_used = duration_used + excluded.duration_used,
+             tier = excluded.tier,
+             updated_at = excluded.updated_at`
+        ).bind(`asr_${userId}_${weekKey}`, userId, weekKey, Math.floor(amount), tier, now, now).run()
         break
       }
 
       case 'consume_characters': {
         const weekKey = getWeekKey()
-        const result = await db.prepare(
-          'SELECT characters_used FROM user_asr_quota WHERE user_id = ? AND week_key = ?'
-        ).bind(userId, weekKey).first<{ characters_used: number }>()
-
-        if (result) {
-          await db.prepare(
-            'UPDATE user_asr_quota SET characters_used = characters_used + ?, tier = ?, updated_at = ? WHERE user_id = ? AND week_key = ?'
-          ).bind(Math.floor(amount), tier, now, userId, weekKey).run()
-        } else {
-          await db.prepare(
-            'INSERT INTO user_asr_quota (id, user_id, week_key, duration_used, characters_used, tier, updated_at, created_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?)'
-          ).bind(`asr_${userId}_${weekKey}`, userId, weekKey, Math.floor(amount), tier, now, now).run()
-        }
+        // Atomic upsert — see consume_duration above for the race this closes.
+        await db.prepare(
+          `INSERT INTO user_asr_quota (id, user_id, week_key, duration_used, characters_used, tier, updated_at, created_at)
+           VALUES (?, ?, ?, 0, ?, ?, ?, ?)
+           ON CONFLICT(user_id, week_key) DO UPDATE SET
+             characters_used = characters_used + excluded.characters_used,
+             tier = excluded.tier,
+             updated_at = excluded.updated_at`
+        ).bind(`asr_${userId}_${weekKey}`, userId, weekKey, Math.floor(amount), tier, now, now).run()
         break
       }
 

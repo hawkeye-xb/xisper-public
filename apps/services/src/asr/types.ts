@@ -98,7 +98,7 @@ export interface ASRProviderAdapter {
    * May return an already-open WebSocket (e.g. Cloudflare fetch upgrade)
    * or a connecting one (standard constructor). The caller handles both.
    */
-  createConnection(env: Record<string, any>): WebSocket | Promise<WebSocket>
+  createConnection(env: Record<string, any>, config?: ASRSessionConfig): WebSocket | Promise<WebSocket>
 
   /**
    * Send the provider-specific initialisation message

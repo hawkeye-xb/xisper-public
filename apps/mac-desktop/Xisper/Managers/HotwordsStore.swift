@@ -279,7 +279,7 @@ final class HotwordsStore {
             req.httpBody = try JSONSerialization.data(withJSONObject: json)
         }
 
-        return try await URLSession.shared.data(for: req)
+        return try await AppURLSession.shared.data(for: req)
     }
 
     private func parseError(_ data: Data) -> String? {

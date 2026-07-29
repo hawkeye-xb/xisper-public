@@ -589,7 +589,7 @@ final class RecordingCoordinator {
         recLog("stopSession() — state=finalizing, waiting for ASR final...")
 
         capturedContext = collectContext()
-        recLog("stopSession() — context captured: app=\(capturedContext?.appName ?? "nil"), hasSelectedText=\(capturedContext?.selectedText?.isEmpty == false)")
+        recLog("stopSession() — context captured: hasApp=\(capturedContext?.appName != nil), selectedTextLength=\(capturedContext?.selectedText?.count ?? 0)")
 
         // Dynamic final timeout: short recordings need 15s base; longer recordings
         // (and especially ones that hit a mid-recording reconnect + replay) need
@@ -599,7 +599,7 @@ final class RecordingCoordinator {
 
         do {
             let text = try await client.waitForFinal(timeout: finalTimeout)
-            recLog("stopSession() — ASR final received, length=\(text.count)")
+            recLog("stopSession() — ASR final text received, length=\(text.count)")
 
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 let zeroResults = client.isLastResultLikelyServiceError

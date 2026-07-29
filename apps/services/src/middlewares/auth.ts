@@ -92,7 +92,8 @@ export async function verifyJWT(
   } catch (error: any) {
     // In development: fallback to decode-only when JWKS is unreachable
     const isDev = !env.ENVIRONMENT || env.ENVIRONMENT === 'development';
-    const isNetworkError = error?.code === 'ERR_JOSE_GENERIC' || error?.message?.includes('fetch');
+    const isNetworkError = error?.code === 'ERR_JOSE_GENERIC'
+      || /(fetch|network|socket|connection|unreachable|could not connect|ECONNREFUSED|ENOTFOUND)/i.test(error?.message || '');
 
     if (isDev && isNetworkError) {
       console.warn('[Auth] JWKS unreachable, falling back to decodeJWT (dev only)');

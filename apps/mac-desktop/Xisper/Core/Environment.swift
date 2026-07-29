@@ -98,6 +98,19 @@ enum AppEnvironment {
         "xisper-\(environmentName)-auth.log"
     }
 
+    // MARK: - Analytics (PostHog)
+
+    /// PostHog project API key. This is a WRITE-only, public-by-design key.
+    /// The OSS build sets this via build configuration or leaves it empty.
+    static var posthogKey: String {
+        configuration("XisperPosthogKey", fallback: "")
+    }
+
+    /// PostHog ingestion host.
+    static var posthogHost: String {
+        configuration("XisperPosthogHost", fallback: "https://us.i.posthog.com")
+    }
+
     // MARK: - Auto Update
 
     /// Sparkle appcast feed URL.

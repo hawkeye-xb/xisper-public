@@ -18,7 +18,7 @@ import { normalizeTier, type UserTier, type CustomQuotaLimits } from '../config/
 
 import type { ASRProviderAdapter } from '../asr/types';
 import type { ASRSessionConfig, NormalizedASREvent, NormalizedUtterance } from '../asr/types';
-import { createASRAdapter } from '../asr/adapter-factory';
+import { createASRAdapter, createRetranscribeChain } from '../asr/adapter-factory';
 
 // ---------------------------------------------------------------------------
 // Bindings
@@ -28,16 +28,16 @@ type Bindings = {
   AI_KV: KVNamespace;
   DB: D1Database;
   AI_WORKER: Fetcher;
+  // Per-user concurrency guard (Durable Object). Optional so a deploy that hasn't
+  // wired the binding yet (or local dev) fails OPEN rather than breaking ASR.
+  ASR_SESSION_GUARD?: DurableObjectNamespace;
   LOGTO_ENDPOINT: string;
   LOGTO_APP_ID?: string;
-  DOUBAO_APP_ID?: string;
-  DOUBAO_ACCESS_TOKEN?: string;
-  DOUBAO_RESOURCE_ID?: string;
-  DOUBAO_CLUSTER?: string;
   ALIBABA_API_KEY?: string;
   ALIBABA_VOCABULARY_ID?: string;
   ASR_MODEL?: string;
   SONIOX_API_KEY?: string;
+  ELEVENLABS_API_KEY?: string;
   ENVIRONMENT?: string;
 };
 
@@ -96,10 +96,34 @@ export async function handleASRWebSocket(c: Context<{ Bindings: Bindings }>) {
     return c.text(reason, 429);
   }
 
+  const sessionId = generateSessionId();
+
+  // Concurrency guard — bound simultaneous ASR sessions per user. The quota check
+  // above only reads SETTLED usage, so without this a user at their limit could open
+  // many sockets in the same instant, all pass the gate, and multiply real upstream $.
+  // The DO is single-threaded per user, so parallel connects serialize through it.
+  // Fails OPEN (binding absent / DO hiccup) so it never blocks legitimate dictation.
+  if (c.env.ASR_SESSION_GUARD) {
+    try {
+      const guard = c.env.ASR_SESSION_GUARD.get(c.env.ASR_SESSION_GUARD.idFromName(userId));
+      const guardRes = await guard.fetch('https://guard/acquire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method: 'acquire', sessionId }),
+      });
+      if (!guardRes.ok) {
+        const info = (await guardRes.json().catch(() => ({}))) as { active?: number; limit?: number };
+        console.log(`[ASR Proxy] Concurrency limit for user ${userId}: active=${info.active}/${info.limit}`);
+        return c.text(`Too many concurrent ASR sessions (limit ${info.limit ?? 3})`, 429);
+      }
+    } catch (e) {
+      console.warn('[ASR Proxy] Concurrency guard error (failing open):', (e as Error).message);
+    }
+  }
+
   // Create WebSocket pair
   const pair = new WebSocketPair();
   const [client, server] = Object.values(pair);
-  const sessionId = generateSessionId();
 
   // Extract geo info from CF request metadata for ASR geo-routing.
   const clientCountry = (c.req.raw.cf as any)?.country as string | undefined;
@@ -131,6 +155,24 @@ async function handleASRProxyConnection(
   let lastActivityTime = Date.now();
   let recordingId: string | null = null;
 
+  // Release the per-user concurrency slot exactly once, however the session ends
+  // (normal close, retranscribe path, or setup error). Idempotent via guardReleased.
+  let guardReleased = false;
+  const releaseGuardSlot = async () => {
+    if (guardReleased || !env.ASR_SESSION_GUARD) return;
+    guardReleased = true;
+    try {
+      const guard = env.ASR_SESSION_GUARD.get(env.ASR_SESSION_GUARD.idFromName(userId));
+      await guard.fetch('https://guard/release', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method: 'release', sessionId }),
+      });
+    } catch (e) {
+      console.warn('[ASR Proxy] Concurrency guard release failed:', (e as Error).message);
+    }
+  };
+
   // Metrics
   const sessionStartTime = Date.now();
   let totalCharCount = 0;
@@ -145,10 +187,9 @@ async function handleASRProxyConnection(
   let durationTimerId: ReturnType<typeof setInterval> | null = null;
 
   // Message buffer (PCM binary frames arriving before upstream is ready).
-  // Bound memory per connection so a stalled provider cannot exhaust the Worker.
-  const MAX_BUFFER_BYTES = 8 * 1024 * 1024;
+  // No size limit — a transparent proxy must never drop audio frames.
+  // At 32KB/s (16kHz×16bit×mono), even 60s of buffering is only ~1.9MB.
   const messageBuffer: ArrayBuffer[] = [];
-  let bufferedBytes = 0;
   let isBuffering = true;
   const bufferStats = { maxSize: 0, totalBuffered: 0 };
 
@@ -266,15 +307,7 @@ async function handleASRProxyConnection(
     if (!firstAudioTime) firstAudioTime = Date.now();
 
     if (isBuffering) {
-      const frame = event.data as ArrayBuffer;
-      if (bufferedBytes + frame.byteLength > MAX_BUFFER_BYTES) {
-        console.warn(`[ASR Proxy] Closing ${sessionId}: pre-connect audio buffer exceeded limit`);
-        clientWS.close(1009, 'Audio buffer limit exceeded');
-        sessionResolve();
-        return;
-      }
-      messageBuffer.push(frame);
-      bufferedBytes += frame.byteLength;
+      messageBuffer.push(event.data as ArrayBuffer);
       bufferStats.totalBuffered++;
       if (messageBuffer.length > bufferStats.maxSize) bufferStats.maxSize = messageBuffer.length;
     } else {
@@ -308,13 +341,22 @@ async function handleASRProxyConnection(
 
     // Step 3.5 — Async file transcription for retranscribe.
     // Client sends retranscribe:true when re-transcribing a saved recording.
-    // If the adapter supports transcribeFile (e.g. Soniox Async API),
-    // wait for all audio + finish, then use the async file API.
-    // No delay for normal recordings — they go straight to real-time WebSocket.
-    const adapter = createASRAdapter(env, country);
+    // Chain through all available file-transcription adapters in priority order
+    // (ElevenLabs → Soniox). No delay for normal recordings — they go straight
+    // to real-time WebSocket.
 
-    if (sessionConfig.retranscribe && adapter.transcribeFile) {
-      console.log(`[ASR Proxy] Retranscribe mode with ${adapter.name} async file transcription`);
+    if (sessionConfig.retranscribe) {
+      const chain = createRetranscribeChain(env);
+      console.log(`[ASR Proxy] Retranscribe mode — chain: ${chain.map(a => a.name).join(', ') || 'empty'}`);
+
+      if (chain.length === 0) {
+        sendToClient(clientWS, { type: 'error', is_last_package: true, error: 'No retranscribe adapter available', provider: 'chain' });
+        try { clientWS.close(1011, 'No adapter'); } catch { /* ignore */ }
+        sessionResolve!();
+        await sessionComplete;
+        await releaseGuardSlot();
+        return;
+      }
 
       // Wait for client to send all audio + finish
       await new Promise<void>((resolve) => {
@@ -327,7 +369,7 @@ async function handleASRProxyConnection(
       });
 
       isBuffering = false;
-      sendToClient(clientWS, { type: 'started', code: 20000000, provider: adapter.name });
+      sendToClient(clientWS, { type: 'started', code: 20000000, provider: 'chain' });
 
       // Merge buffered PCM
       const totalBytes = messageBuffer.reduce((sum, buf) => sum + buf.byteLength, 0);
@@ -338,27 +380,45 @@ async function handleASRProxyConnection(
         mergeOffset += buf.byteLength;
       }
       messageBuffer.length = 0;
-      bufferedBytes = 0;
 
-      console.log(`[ASR Proxy] Retranscribe: ${totalBytes} bytes PCM, sending to ${adapter.name} async API`);
+      console.log(`[ASR Proxy] Retranscribe: ${totalBytes} bytes PCM → trying chain`);
       const wavData = buildWav(merged.buffer, sessionConfig.sampleRate || 16000, 1);
 
-      try {
-        const text = await adapter.transcribeFile(env, wavData, sessionConfig);
+      let text = '';
+      let succeeded = false;
+
+      for (const adapter of chain) {
+        if (!adapter.transcribeFile) continue;
+
+        console.log(`[ASR Proxy] Retranscribe: trying ${adapter.name}...`);
+        try {
+          text = await adapter.transcribeFile(env, wavData, sessionConfig);
+          succeeded = true;
+          console.log(`[ASR Proxy] Retranscribe: ${adapter.name} succeeded (${text.length} chars)`);
+          break;
+        } catch (e: any) {
+          console.warn(`[ASR Proxy] Retranscribe: ${adapter.name} failed — ${e.message}`);
+          // Continue to next adapter in chain
+        }
+      }
+
+      if (!succeeded) {
+        console.error(`[ASR Proxy] Retranscribe: all ${chain.length} adapters failed`);
+        sendToClient(clientWS, { type: 'error', is_last_package: true, error: 'All retranscribe providers failed', provider: 'chain' });
+      } else {
         receivedAsrFinal = true;
         const charStats = calculateCharacterCount(text);
         totalCharCount = charStats.count;
-        console.log(`[ASR Proxy] Async transcription done (${charStats.count} chars)`);
 
         sendToClient(clientWS, {
           type: 'result', code: 20000000, is_last_package: false,
           result: { text, utterances: [{ text, definite: true }] },
-          provider: adapter.name,
+          provider: 'chain',
         });
         sendToClient(clientWS, {
           type: 'finished', code: 20000000, is_last_package: true,
           result: { text, utterances: [{ text, definite: true }] },
-          provider: adapter.name,
+          provider: 'chain',
         });
 
         // Consume quota via AI_WORKER
@@ -373,26 +433,27 @@ async function handleASRProxyConnection(
         }
         offloadMetering(env.AI_WORKER, executionCtx, {
           action: 'audit', userId, amount: durationSec, tier: userTier,
-          metadata: { metric: 'duration', sessionId, recordingId, adapter: adapter.name, mode: 'async-file' },
+          metadata: { metric: 'duration', sessionId, recordingId, adapter: 'chain', mode: 'async-file' },
         });
-      } catch (e: any) {
-        console.error(`[ASR Proxy] Async file transcription failed:`, e.message);
-        sendToClient(clientWS, { type: 'error', is_last_package: true, error: e.message, provider: adapter.name });
       }
 
       try { clientWS.close(1000, 'Normal closure'); } catch { /* ignore */ }
       sessionResolve!();
       await sessionComplete;
+      await releaseGuardSlot();
       return;
     }
-    const MAX_CONNECT_RETRIES = 2;
+
+    const adapter = createASRAdapter(env, country);
+
+    const MAX_CONNECT_RETRIES = 1; // No fallback on real-time — fast error, let user retranscribe
 
     for (let attempt = 1; attempt <= MAX_CONNECT_RETRIES; attempt++) {
       try {
         console.log(`[ASR Proxy] Connecting to ${adapter.name} (attempt ${attempt}/${MAX_CONNECT_RETRIES})`);
 
         // createConnection may return a Promise (fetch upgrade) or WebSocket
-        const wsOrPromise = adapter.createConnection(env);
+        const wsOrPromise = adapter.createConnection(env, sessionConfig);
         asrWS = wsOrPromise instanceof Promise ? await wsOrPromise : wsOrPromise;
 
         // fetch-upgrade returns an already-open WebSocket; standard constructor needs to wait
@@ -476,7 +537,6 @@ async function handleASRProxyConnection(
         }
       }
       messageBuffer.length = 0;
-      bufferedBytes = 0;
     }
     isBuffering = false;
     console.log('[ASR Proxy] Switched to direct forwarding');
@@ -812,6 +872,8 @@ async function handleASRProxyConnection(
         firstTextLatencyMs,
         bufferStats,
       });
+
+      await releaseGuardSlot();
     }
   } catch (error: any) {
     console.error('[ASR Proxy] Connection error:', error.message || error);
@@ -854,7 +916,7 @@ async function handleASRProxyConnection(
     }
 
     messageBuffer.length = 0;
-    bufferedBytes = 0;
+    await releaseGuardSlot();
     sessionResolve!();
   }
 

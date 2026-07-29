@@ -158,6 +158,7 @@ struct AuthView: View {
     private func signIn(forceRelogin: Bool = false) {
         isLoading = true
         errorMessage = nil
+        Analytics.loginStarted()
         Task {
             do {
                 try await AuthManager.shared.login(forceRelogin: forceRelogin)
@@ -165,6 +166,9 @@ struct AuthView: View {
                 let cancelled = (error as NSError).code == 1
                 if !cancelled {
                     await MainActor.run { errorMessage = error.localizedDescription }
+                    Analytics.loginResult("error")
+                } else {
+                    Analytics.loginResult("cancelled")
                 }
             }
             await MainActor.run { isLoading = false }

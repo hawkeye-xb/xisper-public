@@ -16,8 +16,7 @@
     "db:init": "wrangler d1 execute ai-services-db-dev --file=./database/schema.sql",
     "db:init:prod": "wrangler d1 execute ai-services-db-prod --env production --remote --file=./database/schema.sql",
     "db:query": "wrangler d1 execute ai-services-db-dev",
-    "check": "wrangler deployments list",
-    "check-types": "tsc --noEmit"
+    "check": "wrangler deployments list"
   },
   "keywords": [
     "cloudflare-workers",
@@ -33,7 +32,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240620.0",
     "@types/node": "^20.14.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "ws": "^8.21.1"
   },
   "dependencies": {
     "@hono/zod-openapi": "^1.2.0",

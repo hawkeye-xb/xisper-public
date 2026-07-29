@@ -23,6 +23,10 @@ final class PaymentManager {
     private(set) var isProcessing = false
     private(set) var lastError: String?
 
+    /// One-shot guard: emit the upgrade-completed analytic at most once per
+    /// successful payment callback (two reconciles run per callback).
+    private static var upgradeCompletedReported = false
+
     private var serviceBaseURL: String { AuthManager.shared.serviceBaseURL }
 
     private init() {}
@@ -57,7 +61,7 @@ final class PaymentManager {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (data, httpResp) = try await URLSession.shared.data(for: req)
+            let (data, httpResp) = try await AppURLSession.shared.data(for: req)
             let status = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
 
             guard status == 200,
@@ -76,6 +80,7 @@ final class PaymentManager {
             }
 
             paymentLog("startUpgrade — opening pricing page with ticket")
+            Analytics.upgradeClicked()
             UsageManager.shared.markAwaitingPayment()
             NSWorkspace.shared.open(url)
         } catch {
@@ -99,6 +104,15 @@ final class PaymentManager {
             // 2. Retry after 3s — webhook may still be in-flight
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             await UsageManager.shared.reconcileAndRefresh()
+
+            // Analytics: only count a real conversion — tier actually flipped to pro.
+            // One-shot guard prevents double emission across the two reconciles.
+            let tier = UsageManager.shared.tier
+            if tier == "pro", !Self.upgradeCompletedReported {
+                Self.upgradeCompletedReported = true
+                Analytics.updateTier(tier)
+                Analytics.upgradeCompleted()
+            }
         }
     }
 
@@ -117,7 +131,7 @@ final class PaymentManager {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (data, httpResp) = try await URLSession.shared.data(for: req)
+            let (data, httpResp) = try await AppURLSession.shared.data(for: req)
             let status = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
 
             guard status == 200,

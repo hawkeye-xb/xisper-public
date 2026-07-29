@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { loadTemplate } from '../prompts/template-store'
 import { buildPostprocessPrompt } from '../prompts/builder'
-import { gatewayComplete } from '../providers/ai-gateway'
+import { gatewayComplete, orderedGatewayModels } from '../providers/ai-gateway'
 import type { VoiceMode } from '../prompts/templates'
 import type { Env } from '../index'
 import { applyITN } from '../utils/itn'
@@ -109,25 +109,25 @@ const postprocessRouter = new Hono<{ Bindings: Env }>()
  * Infer preferred model from speech language or text content
  * @param speechLanguage - Language code (e.g., "zh-CN", "en-US")
  * @param text - Transcript text for heuristic detection
- * @returns Model preference: "qwen3-32b" for Chinese, "llama-3.3-70b" for others
+ * @returns Model preference: "qwen3.6-27b" for CJK, "gpt-oss-120b" for others
  */
 function inferModelFromLanguage(speechLanguage: string | undefined, text: string): string | undefined {
   // Explicit language code
   if (speechLanguage) {
     const lang = speechLanguage.toLowerCase()
     if (lang.startsWith('zh') || lang.startsWith('cn')) {
-      return 'qwen3-32b'  // Chinese: prefer Qwen3 (better Chinese, faster, cheaper)
+      return 'qwen3.6-27b'  // Chinese: prefer Qwen3.6 (CJK-optimized, fast)
     }
     if (lang.startsWith('ja') || lang.startsWith('ko')) {
-      return 'qwen3-32b'  // Japanese/Korean: Qwen3 also good for CJK
+      return 'qwen3.6-27b'  // Japanese/Korean: Qwen3.6 also good for CJK
     }
-    return 'llama-3.3-70b'  // English/others: prefer Llama 3.3
+    return 'gpt-oss-120b'  // English/others: prefer gpt-oss-120b (Groq official rec)
   }
 
   // Heuristic: detect Chinese characters
   const chineseCharCount = (text.match(/[\u4e00-\u9fa5]/g) || []).length
   if (chineseCharCount > text.length * 0.3) {  // >30% Chinese chars
-    return 'qwen3-32b'
+    return 'qwen3.6-27b'
   }
 
   return undefined  // Let gateway use default order

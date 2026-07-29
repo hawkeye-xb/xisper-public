@@ -262,6 +262,7 @@ struct HistoryView: View {
 
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(merged, forType: .string)
+        Analytics.mergeCopyUsed(recordCount: selectedIds.count)
         showToastMessage(String(format: NSLocalizedString("Merged %d records and copied", comment: ""), selectedIds.count))
 
         withAnimation(.easeOut(duration: 0.2)) {
@@ -287,6 +288,7 @@ struct HistoryView: View {
         Task {
             do {
                 let result = try await RetranscribeService.retranscribe(record: record)
+                Analytics.retranscribeUsed()
                 showToastMessage(NSLocalizedString("Retranscribed successfully", comment: ""))
                 _ = result
             } catch {

@@ -161,6 +161,11 @@ final class IdentityManager {
     }
 
     func setActiveIdentity(_ id: String?) {
+        // Analytics: only a genuine user switch (from one identity to another),
+        // not the initial default assignment on first load.
+        if let id, id != activeIdentityId, activeIdentityId != nil {
+            Analytics.identitySwitched(identityId: id)
+        }
         activeIdentityId = id
         if let id, !identityCache.keys.contains(id) {
             Task { await fetchIdentityDetail(id) }
@@ -187,7 +192,7 @@ final class IdentityManager {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: req)
+            let (data, response) = try await AppURLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let raw = json["data"] else { return }
@@ -229,7 +234,7 @@ final class IdentityManager {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: req)
+            let (data, response) = try await AppURLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let raw = json["data"] else { return }

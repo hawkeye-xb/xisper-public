@@ -38,15 +38,23 @@ private func authLog(_ msg: String) {
 enum AuthError: LocalizedError {
     case invalidCallback
     case exchangeFailed
-    case refreshFailed
+    /// Logto genuinely rejected the refresh token (OAuth `invalid_grant`,
+    /// HTTP 400/401/403) or there is no refresh token at all. The credential is
+    /// dead — this is the ONLY condition that should force the user back to login.
+    case refreshRejected(status: Int)
+    /// A recoverable failure that must NOT log the user out: transport error
+    /// (URLError), server-side 5xx, 429 rate-limit, 408 timeout, or a malformed
+    /// 200 body. Keep the session; retry.
+    case refreshTransient(reason: String)
     case notAuthenticated
 
     var errorDescription: String? {
         switch self {
-        case .invalidCallback: "Invalid OAuth callback"
-        case .exchangeFailed:  "Token exchange failed"
-        case .refreshFailed:   "Token refresh failed"
-        case .notAuthenticated:"Not authenticated"
+        case .invalidCallback:  "Invalid OAuth callback"
+        case .exchangeFailed:   "Token exchange failed"
+        case .refreshRejected:  "Token refresh rejected (must re-authenticate)"
+        case .refreshTransient: "Token refresh failed transiently (will retry)"
+        case .notAuthenticated: "Not authenticated"
         }
     }
 }
@@ -78,6 +86,23 @@ final class AuthManager {
     private var refreshTimerSource: DispatchSourceTimer?
     private var activeRefreshTask: Task<String, Error>?
 
+    /// Guards `activeRefreshTask` so the single-flight check-and-set is atomic
+    /// across concurrency domains (AuthManager is not MainActor-isolated, and
+    /// the timer + wake observer can both enter refresh at the same instant).
+    /// Airtight dedup here is what prevents the refresh-token rotation race
+    /// that used to clear all tokens on wake.
+    private let refreshLock = NSLock()
+
+    /// A proactive refresh failed on a *transport* error (network not ready).
+    /// We keep the user authenticated and retry when connectivity returns.
+    private var pendingReachableRefresh = false
+
+    /// Bounded backoff counter for the online-but-flaky retry loop.
+    private var transientRetryCount = 0
+
+    /// Debounce for the burst of wake/unlock notifications macOS posts together.
+    private var lastWakeHandled = Date.distantPast
+
     // MARK: - Environment (delegated to AppEnvironment)
 
     private var logtoAppId: String { AppEnvironment.logtoAppId }
@@ -90,9 +115,26 @@ final class AuthManager {
 
     private init() {
         authLog("AuthManager.init — starting loadStoredTokens")
+        NetworkReachability.shared.start()
         loadStoredTokens()
         authLog("AuthManager.init — done, isAuthenticated=\(isAuthenticated)")
         observeSystemWake()
+        observeNetworkReachable()
+    }
+
+    // MARK: - Reachability observer (retry deferred refreshes when network returns)
+
+    /// When the network path comes back, retry a refresh that was deferred
+    /// because it failed on a transport error. This is what makes "wake with
+    /// Wi-Fi still reconnecting" self-heal instead of dropping to the login screen.
+    private func observeNetworkReachable() {
+        NotificationCenter.default.addObserver(
+            forName: .networkDidBecomeReachable, object: nil, queue: .main
+        ) { [weak self] _ in
+            guard let self, self.isAuthenticated, self.pendingReachableRefresh else { return }
+            authLog("network reachable — retrying deferred token refresh")
+            self.refreshInBackground(trigger: "reachability")
+        }
     }
 
     // MARK: - Wake observer (belt-and-suspenders alongside DispatchSourceTimer)
@@ -106,19 +148,33 @@ final class AuthManager {
 
         let handler: (Notification) -> Void = { [weak self] note in
             guard let self, self.isAuthenticated else { return }
+
+            // Debounce: macOS posts several of these notifications together on a
+            // single wake. Handle the burst once so we don't pile up concurrent
+            // refresh calls that could race Logto's refresh-token rotation.
+            if Date().timeIntervalSince(self.lastWakeHandled) < 2 { return }
+            self.lastWakeHandled = Date()
+
             authLog("system wake/unlock (\(note.name.rawValue)) — checking token freshness")
 
-            if let expiryStr = AuthTokenStore.load(key: "token_expiry"),
-               let expiry = ISO8601DateFormatter().date(from: expiryStr),
-               expiry < Date().addingTimeInterval(120) {
-                authLog("system wake — token expired or expiring soon, refreshing via unified path")
-                self.refreshInBackground()
+            guard let expiryStr = AuthTokenStore.load(key: "token_expiry"),
+                  let expiry = ISO8601DateFormatter().date(from: expiryStr) else { return }
+
+            if expiry < Date().addingTimeInterval(120) {
+                // Token is expiring. Only fire the refresh if the network is
+                // actually usable — throwing a request into a not-yet-reconnected
+                // Wi-Fi is exactly what used to fail and force a re-login. If we're
+                // offline, defer: the reachability observer retries when it returns.
+                if NetworkReachability.shared.isConnected {
+                    authLog("system wake — token expiring, network up, refreshing")
+                    self.refreshInBackground(trigger: "wake")
+                } else {
+                    authLog("system wake — token expiring but offline, deferring to reachability")
+                    self.pendingReachableRefresh = true
+                }
             } else {
                 authLog("system wake — token still valid, rescheduling timer")
-                if let expiryStr = AuthTokenStore.load(key: "token_expiry"),
-                   let expiry = ISO8601DateFormatter().date(from: expiryStr) {
-                    self.scheduleRefresh(in: Int(expiry.timeIntervalSinceNow))
-                }
+                self.scheduleRefresh(in: Int(expiry.timeIntervalSinceNow))
             }
         }
 
@@ -156,17 +212,26 @@ final class AuthManager {
             .init(name: "code_challenge_method", value: "S256"),
         ]
         
-        // Only add prompt parameter when forcing re-authentication
-        if forceRelogin {
-            queryItems.append(.init(name: "prompt", value: "login"))
-        }
-        
+        // Refresh-token guarantee: Logto issues a refresh_token ONLY when
+        // `offline_access` is actually CONSENTED. `prompt=consent` forces that
+        // grant and is the Logto SDK's own default.
+        //
+        // CRITICAL: never use `prompt=login`. Logto returns NO refresh_token for
+        // it (see the logto-io/js `Prompt` enum: "forcing the user to log in
+        // again. Note there'll be no Refresh Token returned in this case."). That
+        // silently kills background refresh, so the session dies ~1h later with
+        // nothing to refresh — the root cause of the recurring "keeps logging
+        // out" bug. `forceRelogin` (Switch Account) therefore also uses consent;
+        // truly forcing a different account (ending the Logto SSO session) is a
+        // separate follow-up and must NOT reintroduce prompt=login.
+        queryItems.append(.init(name: "prompt", value: "consent"))
+
         comps.queryItems = queryItems
         guard let authURL = comps.url else {
             authLog("login() — FAILED to build authURL")
             throw AuthError.invalidCallback
         }
-        authLog("login() — opening authorization browser")
+        authLog("login() — opening authorization URL")
 
         await MainActor.run { _ = NSWorkspace.shared.open(authURL) }
 
@@ -174,7 +239,7 @@ final class AuthManager {
         let callbackURL: URL = try await withCheckedThrowingContinuation { continuation in
             pendingContinuation = continuation
         }
-        authLog("login() — received OAuth callback")
+        authLog("login() — received callback URL")
 
         guard let cbComps  = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
               let code      = cbComps.queryItems?.first(where: { $0.name == "code" })?.value,
@@ -185,13 +250,13 @@ final class AuthManager {
             throw AuthError.invalidCallback
         }
 
-        authLog("login() — state OK, exchanging authorization code")
+        authLog("login() — state OK, exchanging authorization code with Logto")
         pendingState = nil
         try await exchangeToken(code: code, verifier: verifier)
     }
 
     func handleAuthCallback(url: URL) {
-        authLog("handleAuthCallback() — hasContinuation=\(pendingContinuation != nil)")
+        authLog("handleAuthCallback() — received callback; hasContinuation=\(pendingContinuation != nil)")
         pendingContinuation?.resume(returning: url)
         pendingContinuation = nil
     }
@@ -210,7 +275,7 @@ final class AuthManager {
             var req = URLRequest(url: URL(string: "\(serviceBaseURL)/auth/logout")!)
             req.httpMethod = "POST"
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            _ = try? await URLSession.shared.data(for: req)
+            _ = try? await AppURLSession.shared.data(for: req)
         }
 
         // 2. Clear local state (silent logout)
@@ -222,6 +287,7 @@ final class AuthManager {
             isAuthenticated = false
             userEmail = nil
             userId    = nil
+            Analytics.reset()  // stop tying events to the signed-out user
         }
         authLog("logout() — silent logout completed")
     }
@@ -229,6 +295,17 @@ final class AuthManager {
     /// Synchronously returns the stored access token without checking expiry.
     /// Prefer `getValidToken()` in async contexts to ensure the token is fresh.
     func loadToken() -> String? { AuthTokenStore.load(key: "access_token") }
+
+    /// Synchronous guard: token exists AND has >60s of life left.
+    /// Use this at entry points that must decide instantly (e.g. FN key press).
+    /// No network call, no refresh — just a Date() comparison.
+    var isTokenValid: Bool {
+        guard let expiryStr = AuthTokenStore.load(key: "token_expiry"),
+              let expiry = ISO8601DateFormatter().date(from: expiryStr),
+              expiry > Date().addingTimeInterval(60)
+        else { return false }
+        return true
+    }
 
     /// Returns a valid token, automatically refreshing if expired or about to expire.
     /// Multiple concurrent callers share a single refresh to avoid rotation conflicts.
@@ -269,9 +346,10 @@ final class AuthManager {
         ].joined(separator: "&")
         req.httpBody = body.data(using: .utf8)
 
-        let (data, httpResp) = try await URLSession.shared.data(for: req)
+        let (data, httpResp) = try await AppURLSession.shared.data(for: req)
         let statusCode = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
-        authLog("exchangeToken() — HTTP \(statusCode)")
+        let bodyPreview = String(data: data.prefix(500), encoding: .utf8) ?? "<binary>"
+        authLog("exchangeToken() — HTTP \(statusCode), responseBytes=\(data.count)")
 
         guard statusCode == 200 else {
             authLog("exchangeToken() — FAILED: HTTP \(statusCode)")
@@ -298,6 +376,14 @@ final class AuthManager {
             userEmail = payload["email"] as? String
             userId    = payload["sub"] as? String
             scheduleRefresh(in: resp.expires_in)
+            // Analytics: tie events to this user + mark login success.
+            if let uid = userId {
+                Analytics.identify(userId: uid, tier: UsageManager.shared.tier)
+            }
+            Analytics.loginResult("success")
+            // Surface whether Logto actually issued a refresh token + the granted
+            // scope, so refresh-token failures are diagnosable from PostHog alone.
+            Analytics.authLoginRefreshToken(issued: hasRefreshToken, scope: resp.scope)
         }
         authLog("exchangeToken() — token file saved, isAuthenticated=true")
     }
@@ -307,14 +393,23 @@ final class AuthManager {
     /// Public entry point for other managers to trigger token refresh (e.g. on 401).
     /// Goes through the unified deduplicated path to avoid race conditions.
     func refreshAccessToken() async throws {
-        _ = try await refreshAndGetToken()
+        _ = try await refreshAndGetToken(trigger: "reactive_401")
     }
 
+    // MARK: - Refresh network call (pure: fetch + classify, no auth-state side effects)
+    //
+    // CONTRACT: refresh() does exactly two things —
+    //   • on success: persists the rotated tokens + reschedules the timer.
+    //   • on failure: throws a CLASSIFIED error and touches nothing else.
+    // It never flips `isAuthenticated` and never clears tokens. That terminal
+    // decision belongs to a single owner (`applyTerminalDecision`, invoked from
+    // `refreshAndGetToken`) so the policy "only a genuine invalid_grant logs the
+    // user out" lives in exactly one place.
     private func refresh() async throws {
         guard let rt = AuthTokenStore.load(key: "refresh_token"), !rt.isEmpty else {
-            authLog("refresh() — no refresh_token (nil or empty), cannot refresh")
-            await MainActor.run { isAuthenticated = false }
-            throw AuthError.notAuthenticated
+            // No credential to refresh with — equivalent to a hard rejection.
+            authLog("refresh() — no refresh_token (nil or empty)")
+            throw AuthError.refreshRejected(status: 0)
         }
         authLog("refresh() — using stored refresh token")
 
@@ -322,115 +417,210 @@ final class AuthManager {
         var req = URLRequest(url: URL(string: url)!)
         req.httpMethod = "POST"
         req.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-
-        let body = [
+        req.httpBody = [
             "grant_type=refresh_token",
             "refresh_token=\(rt)",
             "client_id=\(logtoAppId)",
-        ].joined(separator: "&")
-        req.httpBody = body.data(using: .utf8)
+        ].joined(separator: "&").data(using: .utf8)
 
-        let (data, httpResp) = try await URLSession.shared.data(for: req)
+        // Transport layer: a URLError here is ALWAYS transient (network not ready
+        // after wake, DNS blip, dropped connection). Never a logout.
+        let data: Data
+        let httpResp: URLResponse
+        do {
+            (data, httpResp) = try await AppURLSession.shared.data(for: req)
+        } catch {
+            let code = (error as? URLError)?.errorCode ?? -1
+            authLog("refresh() — transport error (transient): \(error)")
+            throw AuthError.refreshTransient(reason: "urlerror_\(code)")
+        }
+
         let statusCode = (httpResp as? HTTPURLResponse)?.statusCode ?? -1
 
-        guard statusCode == 200 else {
-            authLog("refresh() — FAILED: HTTP \(statusCode)")
-            await MainActor.run {
-                isAuthenticated = false
-                // Clear stale tokens so next cold start doesn't loop on expired credentials
-                if statusCode == 400 || statusCode == 401 || statusCode == 403 {
-                    AuthTokenStore.clearAll()
-                    refreshTimerSource?.cancel()
-                    refreshTimerSource = nil
-                    userEmail = nil
-                    userId    = nil
-                    authLog("refresh() — cleared stale tokens (HTTP \(statusCode))")
-                }
+        // Success path.
+        if statusCode == 200 {
+            guard let resp = try? JSONDecoder().decode(LogtoTokenResponse.self, from: data) else {
+                // A 200 with an unparseable body is a server/proxy glitch, not a
+                // credential problem — treat as transient, don't nuke the session.
+                authLog("refresh() — HTTP 200 but body decode failed (transient)")
+                throw AuthError.refreshTransient(reason: "decode_200")
             }
-            throw AuthError.refreshFailed
+            let payload = decodeJWTPayload(resp.id_token)
+            await MainActor.run {
+                saveTokensToFile(
+                    token: resp.id_token,
+                    refreshToken: resp.refresh_token ?? rt,
+                    expiresIn: resp.expires_in,
+                    email: payload["email"] as? String ?? userEmail,
+                    userId: payload["sub"] as? String ?? userId
+                )
+                isAuthenticated = true
+                userEmail = payload["email"] as? String ?? userEmail
+                userId    = payload["sub"] as? String ?? userId
+                scheduleRefresh(in: resp.expires_in)
+            }
+            authLog("refresh() — SUCCESS via Logto PKCE, expiresIn=\(resp.expires_in)")
+            return
         }
 
-        let resp = try JSONDecoder().decode(LogtoTokenResponse.self, from: data)
-        let payload = decodeJWTPayload(resp.id_token)
-
-        await MainActor.run {
-            saveTokensToFile(
-                token: resp.id_token,
-                refreshToken: resp.refresh_token ?? rt,
-                expiresIn: resp.expires_in,
-                email: payload["email"] as? String ?? userEmail,
-                userId: payload["sub"] as? String ?? userId
-            )
-            isAuthenticated = true
-            userEmail = payload["email"] as? String ?? userEmail
-            userId    = payload["sub"] as? String ?? userId
-            scheduleRefresh(in: resp.expires_in)
+        // Failure path — classify by status code. Body logged for diagnostics only.
+        let respBody = String(data: data.prefix(500), encoding: .utf8) ?? "<binary>"
+        if statusCode == 400 || statusCode == 401 || statusCode == 403 {
+            // OAuth `invalid_grant`: the refresh token is dead (expired, revoked,
+            // or already rotated). This — and ONLY this — is a real logout.
+            authLog("refresh() — REJECTED: HTTP \(statusCode), responseBytes=\(data.count)")
+            throw AuthError.refreshRejected(status: statusCode)
+        } else {
+            // 5xx / 429 / 408 / anything else: server-side or transient. The
+            // credential is almost certainly fine; keep the session and retry.
+            authLog("refresh() — TRANSIENT: HTTP \(statusCode), responseBytes=\(data.count)")
+            throw AuthError.refreshTransient(reason: "http_\(statusCode)")
         }
-        authLog("refresh() — SUCCESS via Logto PKCE, expiresIn=\(resp.expires_in)")
     }
 
-    /// **Single entry point for all refresh calls.** Deduplicates concurrent callers
-    /// AND retries on transient network errors. Timer, wake observer, on-demand
-    /// (`getValidToken`), and external callers all go through here.
-    /// This prevents Logto refresh-token rotation races where two concurrent
-    /// `refresh()` calls use the same (now-rotated) token and the second gets 400.
-    private func refreshAndGetToken() async throws -> String {
+    /// **Single entry point + single decision owner for all refreshes.**
+    ///
+    /// Deduplicates concurrent callers (single-flight) so a timer-fired refresh
+    /// and a wake-observer refresh can never both mint a task and burn the
+    /// rotating refresh token twice. Applies the terminal auth-state decision
+    /// exactly once, inside the single-flight task:
+    ///   • `refreshTransient` → leave `isAuthenticated` untouched, just report.
+    ///   • `refreshRejected`  → clear tokens + `isAuthenticated=false` + stop timer.
+    ///
+    /// Retry policy: one retry on a transient error (2s pause); a rejection fails
+    /// immediately with no retry.
+    private func refreshAndGetToken(trigger: String = "user") async throws -> String {
+        // Airtight single-flight: check-and-set under a lock so a timer-fired
+        // refresh and a wake-observer refresh can never both mint a task and
+        // burn the (rotating) refresh token twice.
+        refreshLock.lock()
         if let existing = activeRefreshTask {
-            authLog("refreshAndGetToken() — joining existing task")
+            refreshLock.unlock()
+            authLog("refreshAndGetToken() — joining existing task (trigger=\(trigger))")
             return try await existing.value
         }
         let task = Task<String, Error> { [weak self] in
             guard let self else { throw AuthError.notAuthenticated }
-            defer { self.activeRefreshTask = nil }
+            defer {
+                self.refreshLock.lock()
+                self.activeRefreshTask = nil
+                self.refreshLock.unlock()
+            }
 
-            var lastError: Error = AuthError.notAuthenticated
-            var backoff: TimeInterval = 2
-
-            for attempt in 0...4 {
+            do {
+                // First attempt.
+                try await self.refresh()
+                guard let token = AuthTokenStore.load(key: "access_token") else {
+                    throw AuthError.refreshTransient(reason: "no_token_after_refresh")
+                }
+                Analytics.authRefreshSucceeded(trigger: trigger)
+                return token
+            } catch AuthError.refreshTransient(let reason) {
+                // Transient only: one retry after a short pause. A rejection is
+                // never retried — it falls through to the outer catch below.
+                authLog("refreshAndGetToken() — transient (\(reason)), retrying once")
+                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2s
                 do {
                     try await self.refresh()
                     guard let token = AuthTokenStore.load(key: "access_token") else {
-                        throw AuthError.notAuthenticated
+                        throw AuthError.refreshTransient(reason: "no_token_after_retry")
                     }
-                    if attempt > 0 {
-                        authLog("refreshAndGetToken() — succeeded on retry \(attempt)")
-                    }
+                    authLog("refreshAndGetToken() — succeeded on retry")
+                    Analytics.authRefreshSucceeded(trigger: trigger)
                     return token
                 } catch {
-                    lastError = error
-                    authLog("refreshAndGetToken() — attempt \(attempt) failed: \(error)")
-                    if !Self.isRetryableError(error) { break }
-                    if attempt < 4 {
-                        try? await Task.sleep(nanoseconds: UInt64(backoff * 1_000_000_000))
-                        backoff = min(backoff * 2, 30)
-                    }
+                    await self.applyTerminalDecision(error, trigger: trigger)
+                    throw error
                 }
+            } catch {
+                // refreshRejected / notAuthenticated — terminal, no retry.
+                await self.applyTerminalDecision(error, trigger: trigger)
+                throw error
             }
-            throw lastError
         }
         activeRefreshTask = task
+        refreshLock.unlock()
         return try await task.value
     }
 
-    /// Fire-and-forget refresh via the unified deduplicated path.
-    /// Used by the timer and wake observer — they don't need the return value.
-    private func refreshInBackground() {
+    /// The single place that mutates auth state on a failed refresh, and the
+    /// single place that emits refresh-failure analytics. Runs once per refresh
+    /// cycle (inside the single-flight task) so token-clearing + the logout flip
+    /// happen exactly once and events aren't double-counted.
+    ///
+    /// THE policy, in one function: only `refreshRejected` (genuine invalid_grant)
+    /// ever logs the user out. Everything else keeps the session alive.
+    private func applyTerminalDecision(_ error: Error, trigger: String) async {
+        switch error {
+        case AuthError.refreshRejected(let status):
+            authLog("applyTerminalDecision() — REJECTED (status=\(status), trigger=\(trigger)): forcing re-auth")
+            await MainActor.run {
+                AuthTokenStore.clearAll()
+                refreshTimerSource?.cancel()
+                refreshTimerSource = nil
+                isAuthenticated = false
+                userEmail = nil
+                userId    = nil
+            }
+            Analytics.authRefreshRejected(trigger: trigger, status: status)
+        case AuthError.refreshTransient(let reason):
+            authLog("applyTerminalDecision() — TRANSIENT (\(reason), trigger=\(trigger)): staying authenticated")
+            Analytics.authRefreshTransient(trigger: trigger, reason: reason)
+        default:
+            authLog("applyTerminalDecision() — other error (trigger=\(trigger)): \(error)")
+            Analytics.authRefreshTransient(trigger: trigger, reason: "other")
+        }
+    }
+
+    /// Fire-and-forget refresh via the unified path.
+    /// Used by the timer, wake observer, reachability observer, and bootstrap.
+    ///
+    /// Cardinal rule: **a transient error is NOT a logout.** The terminal decision
+    /// (clear + re-auth on a genuine rejection, stay signed-in on anything else)
+    /// is made inside `refreshAndGetToken` / `applyTerminalDecision`. Here we only
+    /// schedule follow-up retries for transient failures.
+    private func refreshInBackground(trigger: String) {
         Task {
             do {
-                _ = try await refreshAndGetToken()
-                authLog("refreshInBackground() — success")
+                _ = try await refreshAndGetToken(trigger: trigger)
+                authLog("refreshInBackground(\(trigger)) — success")
+                await MainActor.run {
+                    self.pendingReachableRefresh = false
+                    self.transientRetryCount = 0
+                }
+            } catch AuthError.refreshTransient(let reason) {
+                // Network not ready / server hiccup — transient. Stay authenticated;
+                // retry when connectivity returns or after bounded backoff.
+                authLog("refreshInBackground(\(trigger)) — transient (\(reason)), will retry")
+                await MainActor.run {
+                    self.pendingReachableRefresh = true
+                    self.scheduleTransientRetry()
+                }
             } catch {
-                authLog("refreshInBackground() — failed: \(error)")
+                // refreshRejected / etc. — the credential is genuinely dead and
+                // applyTerminalDecision already cleared tokens + flipped
+                // isAuthenticated=false. Nothing more to do here.
+                authLog("refreshInBackground(\(trigger)) — terminal: \(error)")
             }
         }
     }
 
-    /// Network errors are retryable; auth errors (400/401/403 from Logto) are not.
-    private static func isRetryableError(_ error: Error) -> Bool {
-        if error is URLError { return true }
-        if case AuthError.refreshFailed = error { return false }
-        if case AuthError.notAuthenticated = error { return false }
-        return true
+    /// Bounded backoff retry for the online-but-flaky case (network path is
+    /// satisfied but the refresh still failed, e.g. a Logto hiccup). Caps out
+    /// and then leans on the reachability observer / wake handler so we never
+    /// spin. Reset on any successful refresh.
+    private func scheduleTransientRetry() {
+        guard transientRetryCount < 5 else {
+            authLog("scheduleTransientRetry() — max attempts, waiting for reachability/wake")
+            return
+        }
+        let delay = min(60, 10 << transientRetryCount)   // 10, 20, 40, 60, 60s
+        transientRetryCount += 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + Double(delay)) { [weak self] in
+            guard let self, self.isAuthenticated, self.pendingReachableRefresh else { return }
+            authLog("scheduleTransientRetry() — retry #\(self.transientRetryCount) after \(delay)s")
+            self.refreshInBackground(trigger: "retry")
+        }
     }
 
     /// Schedule the next token refresh using DispatchSourceTimer with `.strict` flag
@@ -444,7 +634,7 @@ final class AuthManager {
         let timer = DispatchSource.makeTimerSource(flags: .strict, queue: .main)
         timer.schedule(wallDeadline: .now() + delay)
         timer.setEventHandler { [weak self] in
-            self?.refreshInBackground()
+            self?.refreshInBackground(trigger: "timer")
         }
         refreshTimerSource = timer
         timer.resume()
@@ -465,7 +655,7 @@ final class AuthManager {
         authLog("  tokenExpiry=\(allTokens["token_expiry"] ?? "nil")")
         authLog("  email=\(allTokens["email"] ?? "nil")")
         if let rtk = allTokens["refresh_token"], rtk.count > 8 {
-            authLog("  hasRefreshToken=\(!rtk.isEmpty)")
+            authLog("  hasNonEmptyRefreshToken=true")
         }
 
         let hasToken = allTokens["access_token"]
@@ -487,9 +677,10 @@ final class AuthManager {
             let expiryStr = allTokens["token_expiry"] ?? "nil"
             authLog("  → token expired (expiry=\(expiryStr)), refreshing via unified path")
             // Optimistically mark as authenticated to avoid flashing login screen.
-            // refreshAndGetToken will set isAuthenticated=false if refresh truly fails.
+            // applyTerminalDecision sets isAuthenticated=false only if the refresh
+            // token is genuinely rejected; a transient failure keeps us signed in.
             isAuthenticated = true
-            refreshInBackground()
+            refreshInBackground(trigger: "bootstrap")
         }
     }
 
@@ -497,7 +688,7 @@ final class AuthManager {
         guard let token = AuthTokenStore.load(key: "access_token"), !token.isEmpty else { return }
         var req = URLRequest(url: URL(string: "\(serviceBaseURL)/auth/profile")!)
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        guard let (data, _) = try? await URLSession.shared.data(for: req),
+        guard let (data, _) = try? await AppURLSession.shared.data(for: req),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let email = json["email"] as? String ?? json["username"] as? String
         else { return }

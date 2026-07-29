@@ -64,7 +64,7 @@ final class UsageManager {
 
     private init() {}
 
-    /// Sidebar: unlimited users get a premium identity block — never the finite quota bar (product: "premium" tier, not metering).
+    /// Sidebar: unlimited users get a premium identity block — never the finite quota bar (product: “高贵” tier, not metering).
     var isUnlimitedTier: Bool {
         tier.lowercased() == "unlimited"
     }
@@ -132,7 +132,7 @@ final class UsageManager {
         let url = "\(serviceBaseURL)/api/v1/subscription/status"
         var req = URLRequest(url: URL(string: url)!)
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        _ = try? await URLSession.shared.data(for: req)
+        _ = try? await AppURLSession.shared.data(for: req)
         #if DEBUG
         usageLog("reconcileSubscription() done")
         #endif
@@ -164,7 +164,7 @@ final class UsageManager {
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: req)
+            let (data, response) = try await AppURLSession.shared.data(for: req)
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
 
             #if DEBUG

@@ -11,6 +11,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Singleton access (NSApp.delegate cast fails inside MenuBarExtra)
     static private(set) var shared: AppDelegate?
 
+    /// Process launch time — used to measure time-to-first-dictation for the
+    /// activation funnel.
+    static let launchTime = Date()
+
     // MARK: - Main window
 
     /// Retained reference — window is not released on close (LSUIElement app).
@@ -44,6 +48,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
+
+        // ── Analytics (PostHog) — init first so launch/activation events are captured ──
+        Analytics.configure()
+        let firstLaunchKey = "analytics.hasLaunchedBefore"
+        let launchedBefore = UserDefaults.standard.bool(forKey: firstLaunchKey)
+        Analytics.appLaunched(isFirstLaunch: !launchedBefore)
+        if !launchedBefore { UserDefaults.standard.set(true, forKey: firstLaunchKey) }
+        // Re-identify an already-signed-in user on relaunch so events attach to them.
+        if let uid = AuthManager.shared.userId {
+            Analytics.identify(userId: uid, tier: UsageManager.shared.tier)
+        }
 
         // Apply language override BEFORE any UI/localized string is loaded.
         LanguageManager.applySwizzle()

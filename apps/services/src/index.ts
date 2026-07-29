@@ -55,6 +55,10 @@ import { normalizeTier } from './config/rate-limits';
 
 // JWT verification is now handled by shared authMiddleware from middlewares/auth.ts
 
+// Durable Objects — must be re-exported from the worker entrypoint so the runtime
+// can instantiate them. AsrSessionGuard caps concurrent ASR sessions per user.
+export { AsrSessionGuard } from './durable/asr-session-guard';
+
 // Type for Cloudflare Rate Limiting binding (Wrangler 4.36+)
 interface RateLimitBinding {
   limit: (opts: { key: string }) => Promise<{ success: boolean }>;
@@ -76,12 +80,11 @@ type Bindings = {
   CREEM_API_KEY: string;
   PAYMENT_WEBHOOK_SECRET?: string;
   ENVIRONMENT: string;
-  ALLOWED_ORIGINS?: string;
-  DOUBAO_APP_ID?: string;
-  DOUBAO_ACCESS_TOKEN?: string;
-  DOUBAO_RESOURCE_ID?: string;
-  DOUBAO_CLUSTER?: string;
+  ASR_MODEL_OVERRIDE?: string;
+  ASR_MODEL?: string;
   ALIBABA_API_KEY?: string;
+  ELEVENLABS_API_KEY?: string;
+  SONIOX_API_KEY?: string;
   ALIBABA_VOCABULARY_ID?: string;
   APP_UPDATE_CONFIG: KVNamespace;
   R2_ENDPOINT: string;
@@ -91,6 +94,7 @@ type Bindings = {
   MAC_UPDATE_PROMOTE_SECRET?: string;
   /** IP-based rate limiter (per CF location), 120 req/60s when configured */
   IP_RATE_LIMITER?: RateLimitBinding;
+  ASR_SESSION_GUARD?: DurableObjectNamespace;
 };
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();

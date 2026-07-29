@@ -118,14 +118,28 @@ enum LLMPostprocessClient {
             body["identityId"] = iid
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        let bodyData = try? JSONSerialization.data(withJSONObject: body)
 
-        let (data, response) = try await URLSession.shared.data(for: request)
-        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        // Reactive 401 handling: getValidToken() refreshes proactively, but if the
+        // server still rejects (clock skew / token revoked mid-flight), refresh once
+        // and retry before surfacing an error — the standard interceptor pattern.
+        func send(bearer: String) async throws -> (Data, Int) {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
+            request.httpBody = bodyData
+            let (d, r) = try await AppURLSession.shared.data(for: request)
+            return (d, (r as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+
+        var (data, statusCode) = try await send(bearer: token)
+        if statusCode == 401 {
+            print("[LLMPostprocess] HTTP 401 — refreshing token and retrying once")
+            try await AuthManager.shared.refreshAccessToken()
+            let fresh = try await AuthManager.shared.getValidToken()
+            (data, statusCode) = try await send(bearer: fresh)
+        }
         let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8>"
 
         print("[LLMPostprocess] HTTP \(statusCode), voiceMode=\(voiceMode), body=\(bodyString.prefix(500))")

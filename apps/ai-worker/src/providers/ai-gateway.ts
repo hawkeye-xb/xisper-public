@@ -16,7 +16,7 @@ interface CompletionParams {
   temperature?: number
   maxTokens?: number
   stream?: boolean
-  preferredModel?: string  // Model preference hint (e.g., "qwen3-32b", "llama-3.3-70b")
+  preferredModel?: string  // Model preference hint (e.g., "qwen3.6-27b", "gpt-oss-120b")
 }
 
 // ---------------------------------------------------------------------------
@@ -65,16 +65,17 @@ const GATEWAY_PROVIDERS = [
     envKey: 'GROQ_API_KEY' as const,
     provider: 'groq',
     endpoint: 'chat/completions',
-    model: 'qwen/qwen3-32b',  // Qwen3: better for Chinese, 400 t/s, cheaper
-    modelHint: 'qwen3-32b',
-    extraQuery: { reasoning_effort: 'none' },  // Disable <think> tags for faster response
+    model: 'qwen/qwen3.6-27b',  // Qwen3.6 (CJK-optimized): replaces deprecated qwen3-32b (Groq shutdown 07/17/26). ~500 t/s, 131k ctx
+    modelHint: 'qwen3.6-27b',
+    extraQuery: { reasoning_effort: 'none' },  // 'none' disables <think> for speed — Qwen ONLY (gpt-oss uses low/medium/high, see below)
   },
   {
     envKey: 'GROQ_API_KEY' as const,
     provider: 'groq',
     endpoint: 'chat/completions',
-    model: 'llama-3.3-70b-versatile',  // Llama: better for English, 280 t/s, lower TTFT
-    modelHint: 'llama-3.3-70b',
+    model: 'openai/gpt-oss-120b',  // gpt-oss-120b: replaces deprecated llama-3.3-70b (Groq shutdown 08/16/26). Groq official rec, o4-mini-class reasoning, ~500 t/s
+    modelHint: 'gpt-oss-120b',
+    extraQuery: { reasoning_effort: 'low' },  // gpt-oss supports low/medium/high (NOT 'none'); 'low' = fastest for simple postprocess cleanup
   },
   {
     envKey: 'GEMINI_API_KEY' as const,
@@ -108,26 +109,26 @@ const ASIA_REGIONS = new Set(['SG', 'MY', 'TH', 'ID', 'VN', 'PH', 'JP', 'KR']) /
 // Gateway ordering
 // ---------------------------------------------------------------------------
 
-function getGatewayOrder(country?: string, preferredModel?: string): readonly string[] {
-  // If user specifies preferred model, prioritize matching provider
-  if (preferredModel) {
-    const matchingProviders: string[] = []
-    const otherProviders: string[] = []
-    
-    for (const provider of GATEWAY_PROVIDERS) {
-      const hint = 'modelHint' in provider ? provider.modelHint : undefined
-      if (hint && preferredModel.includes(hint as string)) {
-        matchingProviders.push(`${provider.provider}:${provider.model}`)
-      } else {
-        otherProviders.push(`${provider.provider}:${provider.model}`)
-      }
+function getGatewayOrder(preferredModel?: string): string[] {
+  // Order the gateway chain, pulling the language-preferred model to the front.
+  // Sort token is `${provider}:${model}` — the two Groq slots share provider 'groq',
+  // so keying on provider alone can never separate them (that was the latent bug that
+  // silently no-op'd the CJK/English split).
+  const matching: string[] = []
+  const others: string[] = []
+
+  for (const provider of GATEWAY_PROVIDERS) {
+    const token = `${provider.provider}:${provider.model}`
+    const hint = 'modelHint' in provider ? provider.modelHint : undefined
+    if (preferredModel && hint && preferredModel.includes(hint as string)) {
+      matching.push(token)
+    } else {
+      others.push(token)
     }
-    
-    return [...matchingProviders, ...otherProviders, 'deepseek']
   }
-  
-  // Default: Qwen3 → Llama3.3 → Gemini → OpenRouter → DeepSeek
-  return ['groq:qwen3-32b', 'groq:llama-3.3-70b', 'google-ai-studio', 'openrouter', 'deepseek']
+
+  // Non-matching keep GATEWAY_PROVIDERS order: CJK-slot → English-slot → Gemini → OpenRouter → DeepSeek
+  return [...matching, ...others]
 }
 
 export function getConfiguredProviders(env: ProviderEnv): string[] {
@@ -189,12 +190,29 @@ async function directComplete(
 // AI Gateway call - unified for all providers
 // ---------------------------------------------------------------------------
 
-function buildGatewaySteps(env: ProviderEnv, params: CompletionParams, country?: string): GatewayStep[] {
-  const order = getGatewayOrder(country)
-
-  const sorted = [...GATEWAY_PROVIDERS].sort(
-    (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider),
+// Order GATEWAY_PROVIDERS for a given language hint. Shared by step-building AND
+// the telemetry step→model resolver so their indices always agree.
+function orderedGatewayProviders(preferredModel?: string) {
+  const order = getGatewayOrder(preferredModel)
+  return [...GATEWAY_PROVIDERS].sort(
+    (a, b) => order.indexOf(`${a.provider}:${a.model}`) - order.indexOf(`${b.provider}:${b.model}`),
   )
+}
+
+// The ordered list of gateway MODELS actually configured (same apiKey filter as
+// buildGatewaySteps). CF AI Gateway's `cf-aig-step` header indexes into THIS array,
+// so it maps a served step back to the model that actually answered — the key
+// signal for seeing fallbacks in telemetry.
+export function orderedGatewayModels(env: ProviderEnv, preferredModel?: string): string[] {
+  return orderedGatewayProviders(preferredModel)
+    .filter((cfg) => env[cfg.envKey])
+    .map((cfg) => cfg.model)
+}
+
+function buildGatewaySteps(env: ProviderEnv, params: CompletionParams, _country?: string): GatewayStep[] {
+  // preferredModel (from inferModelFromLanguage) MUST be passed through, or the
+  // CJK/English routing silently collapses to default order.
+  const sorted = orderedGatewayProviders(params.preferredModel)
 
   const steps: GatewayStep[] = []
 
@@ -238,7 +256,7 @@ function buildGatewaySteps(env: ProviderEnv, params: CompletionParams, country?:
 //   → AI Gateway (Groq → Gemini 3.1 Flash Lite → OpenRouter → DeepSeek)
 //
 // Free tier quotas:
-// - Groq llama-3.3-70b: 1,000 RPD (completely free)
+// - Groq (qwen3.6-27b / gpt-oss-120b): 1,000 RPD each, 30 RPM / 6K TPM (free tier)
 // - Gemini 3.1 Flash Lite: 500 RPD (15 RPM, free tier)
 // - OpenRouter Gemini: 50 RPD (free tier backup)
 // - DeepSeek: Paid fallback ($0.14/M input, $0.28/M output)

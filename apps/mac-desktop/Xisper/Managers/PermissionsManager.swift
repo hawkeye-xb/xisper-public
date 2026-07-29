@@ -11,6 +11,10 @@ final class PermissionsManager {
     private(set) var accessibilityGranted = false
     private(set) var microphoneGranted = false
 
+    // Track grant transitions so we emit analytics exactly once per grant.
+    private var accessibilityGrantReported = false
+    private var microphoneGrantReported = false
+
     private init() { refresh() }
 
     // MARK: - Public
@@ -18,12 +22,23 @@ final class PermissionsManager {
     func refresh() {
         accessibilityGranted = AXIsProcessTrusted()
         microphoneGranted = AVAudioApplication.shared.recordPermission == .granted
+        // Emit result once when a permission flips to granted (covers both the
+        // immediate-grant and the poll-after-Settings paths).
+        if accessibilityGranted && !accessibilityGrantReported {
+            accessibilityGrantReported = true
+            Analytics.permissionResult(type: "accessibility", granted: true)
+        }
+        if microphoneGranted && !microphoneGrantReported {
+            microphoneGrantReported = true
+            Analytics.permissionResult(type: "microphone", granted: true)
+        }
     }
 
     // MARK: - Accessibility
 
     /// Request accessibility permission - show system prompt first, then open Settings if needed.
     func requestAccessibility() {
+        Analytics.permissionPrompted(type: "accessibility")
         // Try system prompt first - this shows the native macOS Alert
         let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let granted = AXIsProcessTrustedWithOptions(opts as CFDictionary)
@@ -60,6 +75,7 @@ final class PermissionsManager {
 
     /// Request microphone permission - always try requestRecordPermission first.
     func requestMicrophone() {
+        Analytics.permissionPrompted(type: "microphone")
         AVAudioApplication.requestRecordPermission { granted in
             print("🎤 requestRecordPermission result:", granted)
             DispatchQueue.main.async {
