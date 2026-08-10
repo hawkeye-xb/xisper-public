@@ -62,6 +62,10 @@ final class UsageManager {
     /// When true, next app-activation triggers an immediate reconcile+refresh, then resets.
     private(set) var awaitingPaymentReturn = false
 
+    /// L0-G subscription lifecycle: last paid-state observed from the server,
+    /// used to detect paid → non-paid transitions for `subscriptionEnded`.
+    private var lastReportedPaidState: Bool?
+
     private init() {}
 
     /// Sidebar: unlimited users get a premium identity block — never the finite quota bar (product: “高贵” tier, not metering).
@@ -252,6 +256,41 @@ final class UsageManager {
         usageLog("parsed → tier=\(tier) asr.chars=\(asrCharacters.used)/\(asrCharacters.limit) asr.dur=\(asrDuration.used)/\(asrDuration.limit) sub=\(subscriptionStatus ?? "nil") cancelAtEnd=\(subscriptionCancelAtPeriodEnd)")
         #endif
         CrashLogger.log("UsageManager", "parsed: tier=\(tier) asr.chars=\(asrCharacters.used)/\(asrCharacters.limit) asr.dur=\(asrDuration.used)/\(asrDuration.limit)")
+
+        reportSubscriptionLifecycle()
+    }
+
+    // MARK: - L0-G Subscription Lifecycle Analytics
+
+    /// Fires L0-G acquisition events on server-truth tier transitions:
+    ///   • `subscriptionStarted` — once per install, the first time the server
+    ///     reports a paid tier (persisted across launches).
+    ///   • `subscriptionEnded` — on every paid → non-paid transition.
+    ///
+    /// `parseResponse` is the single reconcile point for ALL payment paths
+    /// (URL-scheme callback, app-activation reconcile, 5-min auto-refresh), so
+    /// this covers purchases and cancellations even if the callback is missed.
+    private func reportSubscriptionLifecycle() {
+        let paidTiers: Set<String> = ["pro", "enterprise", "unlimited"]
+        let nowPaid = paidTiers.contains(tier.lowercased())
+
+        // subscriptionStarted — once per install (UserDefaults persisted).
+        let startedKey = "analytics.subscriptionStartedReported"
+        if nowPaid, !UserDefaults.standard.bool(forKey: startedKey) {
+            Analytics.subscriptionStarted(plan: tier)
+            UserDefaults.standard.set(true, forKey: startedKey)
+        }
+
+        // subscriptionEnded — paid → non-paid transition. Reason is derived
+        // from the server subscription status when available.
+        if let wasPaid = lastReportedPaidState, wasPaid, !nowPaid {
+            let status = (subscriptionStatus ?? "").lowercased()
+            let reason = (status == "canceled" || status == "cancelled") ? "cancelled"
+                       : (status == "expired") ? "expired"
+                       : "unknown"
+            Analytics.subscriptionEnded(reason: reason)
+        }
+        lastReportedPaidState = nowPaid
     }
 
     /// Human-readable reset time label, e.g. "in 2d 5h".

@@ -376,10 +376,25 @@ final class AuthManager {
             userEmail = payload["email"] as? String
             userId    = payload["sub"] as? String
             scheduleRefresh(in: resp.expires_in)
+
             // Analytics: tie events to this user + mark login success.
+            let email = payload["email"] as? String
+            let emailDomain = email?.split(separator: "@").last.map(String.init)
+
             if let uid = userId {
-                Analytics.identify(userId: uid, tier: UsageManager.shared.tier)
+                Analytics.identify(userId: uid, tier: UsageManager.shared.tier, emailDomain: emailDomain)
             }
+
+            // Growth: detect first-ever login (once per install, NOT every login).
+            // Distinguished from `loginResult("success")` which fires on every
+            // login including returning users.
+            let firstLoginKey = "analytics.loginCompletedBefore"
+            let loggedInBefore = UserDefaults.standard.bool(forKey: firstLoginKey)
+            if !loggedInBefore {
+                Analytics.firstLoginCompleted(authProvider: "logto", emailDomain: emailDomain)
+                UserDefaults.standard.set(true, forKey: firstLoginKey)
+            }
+
             Analytics.loginResult("success")
             // Surface whether Logto actually issued a refresh token + the granted
             // scope, so refresh-token failures are diagnosable from PostHog alone.

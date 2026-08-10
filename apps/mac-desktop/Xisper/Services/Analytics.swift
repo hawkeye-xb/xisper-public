@@ -22,9 +22,18 @@ enum Analytics {
 
     // MARK: - Identity
 
-    static func identify(userId: String, tier: String) {}
+    static func identify(userId: String, tier: String, emailDomain: String? = nil) {}
     static func updateTier(_ tier: String) {}
     static func reset() {}
+
+    // MARK: - L0-G · Acquisition / Growth funnel
+
+    /// Fires ONCE per install on first-ever login.
+    static func firstLoginCompleted(authProvider: String, emailDomain: String?) {}
+    /// User became a paying customer (once per install).
+    static func subscriptionStarted(plan: String) {}
+    /// User cancelled or their subscription expired.
+    static func subscriptionEnded(reason: String) {}
 
     // MARK: - L0 · Activation funnel
 
