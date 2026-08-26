@@ -1,6 +1,6 @@
 # Xisper
 
-**[🌐 xisper-landing.hawkeye-xb.com](https://xisper-landing.hawkeye-xb.com)** — Download for macOS
+**[🌐 xisper.hawkeye-xb.com](https://xisper.hawkeye-xb.com)** — Download for macOS
 
 > Hold a key, speak, release — your words appear as text in whatever app you're using.
 

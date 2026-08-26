@@ -22,40 +22,22 @@ const PRICING_PLANS = [
     highlighted: false,
   },
   {
-    name: 'Pro',
-    price: '$9.99',
-    period: 'per month',
-    description: 'For professionals who rely on speech-to-text daily',
-    badge: 'Popular',
+    name: 'Self-Hosted',
+    price: '$0',
+    period: 'bring your own keys',
+    description: 'For developers who want no limits and full control',
+    badge: 'Open Source',
     features: [
-      '13.3 hours of speech recognition per week',
-      '80,000 characters per week',
-      '3,200 AI processing calls per day',
+      'No quotas — you pay your ASR and LLM providers directly',
+      'Full source: macOS app, Workers backend, AI gateway',
+      'Runs on your own Cloudflare account',
       'Role-based vocabulary (Developer, Lawyer, Doctor, PM)',
       'Custom hotwords and corrections',
-      'Priority support',
+      'MIT licensed',
     ],
-    cta: 'Start Free Trial',
-    ctaHref: '#pro',
+    cta: 'View on GitHub',
+    ctaHref: 'https://github.com/hawkeye-xb/xisper-public',
     highlighted: true,
-  },
-  {
-    name: 'Pro Yearly',
-    price: '$79.99',
-    period: 'per year',
-    description: 'Same Pro features, billed annually — save 33%',
-    badge: 'Best Value',
-    features: [
-      '13.3 hours of speech recognition per week',
-      '80,000 characters per week',
-      '3,200 AI processing calls per day',
-      'Role-based vocabulary (Developer, Lawyer, Doctor, PM)',
-      'Custom hotwords and corrections',
-      'Priority support',
-    ],
-    cta: 'Start Free Trial',
-    ctaHref: '#pro-yearly',
-    highlighted: false,
   },
 ] as const
 
@@ -70,7 +52,7 @@ export default defineComponent({
             Simple, Transparent Pricing
           </h1>
           <p class="max-w-[600px] text-lg text-text-secondary text-center">
-            Choose the plan that fits your workflow. Start free, upgrade when you need more.
+            Xisper is free to use. Want no limits? Run it yourself — the whole stack is open source.
           </p>
         </section>
 
@@ -137,11 +119,11 @@ export default defineComponent({
           <div class="max-w-[800px] w-full flex flex-col gap-8">
             <FAQItem
               question="What happens when I reach my quota?"
-              answer="When you reach your weekly speech recognition limit or daily AI processing limit, the app will notify you. You can either wait for the quota to reset (weekly on Monday at 03:00 Beijing Time for ASR, daily at 03:00 Beijing Time for AI processing) or upgrade to Pro for higher limits."
+              answer="When you reach your weekly speech recognition limit or daily AI processing limit, the app will notify you. You can wait for the quota to reset (weekly on Monday at 03:00 Beijing Time for ASR, daily at 03:00 Beijing Time for AI processing), or self-host Xisper with your own API keys for unlimited use."
             />
             <FAQItem
-              question="Can I try Pro before paying?"
-              answer="Yes! We offer a free trial period for Pro users. Download the app and sign up to start your trial."
+              question="Do I need to pay for anything?"
+              answer="No. Xisper is free to use within the quotas above, and there is nothing to buy. If you need more than the free tier, the entire stack is open source — self-host it with your own ASR and LLM keys and there are no limits."
             />
             <FAQItem
               question="How is speech recognition time calculated?"
@@ -156,8 +138,8 @@ export default defineComponent({
               answer="No. Your audio recordings and transcription text are stored locally on your device. We only store your account information, usage metrics, and custom vocabulary settings (hotwords and corrections) for cross-device sync."
             />
             <FAQItem
-              question="Can I cancel my Pro subscription anytime?"
-              answer="Yes, you can cancel your Pro subscription at any time. You'll continue to have Pro access until the end of your current billing period."
+              question="What do I need to self-host?"
+              answer="A Cloudflare account (Workers, KV, R2), a Logto tenant for auth, and API keys from the ASR and LLM providers you want to use. The repository README walks through the full setup."
             />
           </div>
         </section>
