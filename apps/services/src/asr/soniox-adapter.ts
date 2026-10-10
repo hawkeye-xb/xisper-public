@@ -6,12 +6,17 @@
  * Model: stt-rt-v4 (latest, 60+ languages)
  *
  * Message flow:
- *   1. Connect → send JSON config { api_key, model, audio_format, ... }
+ *   1. Connect (Authorization: Bearer <key> on the upgrade request) → send JSON config
+ *      { model, audio_format, ... } — NO api_key in the message
  *   2. Send binary PCM frames (pcm_s16le)
  *   3. Send empty string "" → graceful close
  *   4. Receive JSON: { tokens: [{ text, is_final, confidence, ... }], finished? }
  *
+ * Auth: the key travels with the connection (Authorization header), never in the
+ * start message. Soniox deprecated the in-message `api_key` form; it stops working
+ * 2027-01-15 (connections without a key on the connection get 401 unauthenticated).
  * Docs: https://soniox.com/docs/stt/api-reference/websocket-api
+ *       https://soniox.com/docs/guides/websocket-authentication
  */
 
 import type {
@@ -45,17 +50,21 @@ export class SonioxAdapter implements ASRProviderAdapter {
    */
   readonly immediateReady = true;
 
-  private apiKey: string = '';
-
   async createConnection(env: Record<string, any>): Promise<WebSocket> {
     const apiKey = env.SONIOX_API_KEY as string;
     if (!apiKey) throw new Error('SONIOX_API_KEY not configured');
-    this.apiKey = apiKey;
 
     // Cloudflare Workers: use fetch with Upgrade header for WebSocket handshake.
+    // The key rides on the connection (Authorization header), not in the start
+    // message — Soniox WS auth migration, announced 2026-10-11. Same fetch +
+    // Upgrade + custom-auth-header pattern the ElevenLabs adapter uses for
+    // `xi-api-key`. Auth failures now arrive as an error frame ~1s AFTER the
+    // connection opens (not as a failed handshake), and are handled by
+    // parseResponse() like any other upstream error.
     const resp = await fetch(SONIOX_WS_URL, {
       headers: {
         Upgrade: 'websocket',
+        Authorization: `Bearer ${apiKey}`,
       },
     });
 
@@ -83,8 +92,10 @@ export class SonioxAdapter implements ASRProviderAdapter {
       if (lang) langHints.push(lang);
     }
 
+    // NOTE: no `api_key` here — the connection already carries the key
+    // (Authorization header, set in createConnection). Soniox accepts omitting
+    // it, and rejects mixing mechanisms (400 invalid_request).
     const initMsg: Record<string, any> = {
-      api_key: this.apiKey,
       model: 'stt-rt-v4',
       audio_format: audioFormat,
       sample_rate: config.sampleRate || 16000,
